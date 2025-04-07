@@ -59,3 +59,11 @@ sysinfo.txt
 
 # Crashlytics generated file
 crashlytics-build.properties
+Lifetide/Temp/Burst
+Lifetide/Library
+Lifetide/Logs
+Lifetide/UserSettings/Layouts
+Lifetide/Assets/Settings
+Lifetide/obj
+Lifetide/UserSettings
+Lifetide/Packages

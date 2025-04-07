@@ -111,3 +111,6 @@ Assets/**/NavMesh.asset filter=lfs diff=lfs merge=lfs -text
 *.meta linguist-generated
 *.prefab linguist-generated
 *.unity linguist-generated
+
+# macOS Dynamic Libraries
+*.dylib filter=lfs diff=lfs merge=lfs -text
