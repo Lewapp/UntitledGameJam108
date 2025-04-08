@@ -148,9 +148,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca6f7b112a4d85f4da32523ecfd562e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  swingSpeed: 20
+  swingSpeed: 100
   s1FinLocation: 120
   s2FinLocation: -150
+  isAttacking: 0
+  attackNo: 0
 --- !u!4 &298547439
 Transform:
   m_ObjectHideFlags: 0

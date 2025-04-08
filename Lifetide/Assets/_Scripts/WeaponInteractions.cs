@@ -9,14 +9,14 @@ public class WeaponInteractions : MonoBehaviour
     public float s1FinLocation = 120f;
     public float s2FinLocation = -150f;
 
-    private float rotationPerTick = 80f;
-    private bool isAttacking;
-    private int attackNo = 0;
+    private float rotationPerTick = 5f;
+    public bool isAttacking;
+    public int attackNo = 0;
     private float GetRotationCount(float startRotation, float finalZRot, float rotPerTick)
     {
         float rotationAmount = Mathf.Abs(startRotation - finalZRot);
         rotationAmount = (rotationAmount <= 180f) ? (360f - rotationAmount) : (rotationAmount);
-        return rotationAmount = rotationAmount / rotPerTick;
+        return rotationAmount = rotationAmount / Mathf.Abs(rotPerTick);
     }
 
     private float GetRotationPercent(float rotationAmount)
@@ -41,7 +41,7 @@ public class WeaponInteractions : MonoBehaviour
                     StartCoroutine(LightSwing(rotationPerTick, s1FinLocation));
                     break;
                 case 1:
-                    StartCoroutine(LightSwing(-rotationPerTick, -s2FinLocation));
+                    StartCoroutine(LightSwing(-rotationPerTick, s2FinLocation));
                     attackNo = 0;
                     break;
             }
@@ -59,24 +59,26 @@ public class WeaponInteractions : MonoBehaviour
 
         while (isAttacking)
         {
+            passedTime += Time.deltaTime * swingSpeed * (1 + (1 - rotationPercent));
+            transform.localRotation = GetRotation(startRotation, rotPerTick, rotationPercent, passedTime);
+            yield return null;
+
             if (passedTime >= 1)
             {
                 startRotation = transform.localRotation.eulerAngles;
-                passedTime = 0f;
+                passedTime -= 1f;
 
                 rotationAmount -= 1f;
                 rotationPercent = rotationAmount > 1f ? 1f : rotationAmount;
             }
-
-            transform.localRotation = GetRotation(startRotation, rotPerTick, rotationPercent, passedTime);
-            passedTime += Time.deltaTime * swingSpeed * (1 + (1 - rotationPercent));
-            yield return null;
 
             if (rotationAmount <= 0)
             {
                 isAttacking = false;
             }
         }
+
+        transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, finalZRot));
     }
 
  /*   private IEnumerator PrepareWeapon(Vector3 finalRot, float rotPerTick)
