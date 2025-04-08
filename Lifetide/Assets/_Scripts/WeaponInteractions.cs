@@ -1,115 +1,192 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static UnityEngine.InputSystem.InputSettings;
 
 public class WeaponInteractions : MonoBehaviour
 {
-    public float swingSpeed = 2f;
-    public float s1FinLocation = 120f;
-    public float s2FinLocation = -150f;
+    // Array holding information for each swing animation.
+    public SwingInfo[] swingAnimations;
 
-    private float rotationPerTick = 5f;
-    public bool isAttacking;
-    public int attackNo = 0;
-    private float GetRotationCount(float startRotation, float finalZRot, float rotPerTick)
-    {
-        float rotationAmount = Mathf.Abs(startRotation - finalZRot);
-        rotationAmount = (rotationAmount <= 180f) ? (360f - rotationAmount) : (rotationAmount);
-        return rotationAmount = rotationAmount / Mathf.Abs(rotPerTick);
-    }
+    // Coroutine reference to track the state of the attack animation.
+    public Coroutine isRotating;
+    // Coroutine reference for handling movement animation.
+    public Coroutine isMoving;
 
-    private float GetRotationPercent(float rotationAmount)
-    {
-        float rotationPercent = rotationAmount > 1f ? 1f : rotationAmount;
-        return rotationPercent;
-    }
+    // Counter to track the current attack sequence.
+    public int attackNo = -1;
 
-    private Quaternion GetRotation(Vector3 startRotation, float rotPerTick, float rotationPercent, float stagePercent)
-    {
-        return Quaternion.Lerp(Quaternion.Euler(startRotation), Quaternion.Euler(new Vector3(0f, 0f, startRotation.z + rotPerTick * rotationPercent)), stagePercent);
-    }
-
+    /// <summary>
+    /// Initiates an attack based on input context, starting the rotation animation if not already attacking.
+    /// </summary>
+    /// <param name="context">The input context from the attack input action.</param>
     public void Attack(InputAction.CallbackContext context)
     {
-        if (!isAttacking)
+        // Proceed only if an attack is not already in progress.
+        if (isRotating == null && isMoving == null)
         {
-            switch(attackNo)
-            {
-                case 0:
-                    attackNo++;
-                    StartCoroutine(LightSwing(rotationPerTick, s1FinLocation));
-                    break;
-                case 1:
-                    StartCoroutine(LightSwing(-rotationPerTick, s2FinLocation));
-                    attackNo = 0;
-                    break;
-            }
+            // Return if no swing animations are defined.
+            if (swingAnimations.Length <= 0) return;
+
+            // Increment the attack number to select the next animation.
+            attackNo++;
+            // Loop back to the first swing animation if the end of the array is reached.
+            attackNo = (int)Mathf.Repeat(attackNo, swingAnimations.Length);
+
+            // Start the rotation animation coroutine for the current attack sequence.
+            isRotating = StartCoroutine(RotateLerp(swingAnimations[attackNo]));
+            isMoving = StartCoroutine(MoveLerp(swingAnimations[attackNo]));
         }
     }
 
-    private IEnumerator LightSwing(float rotPerTick, float finalZRot)
+    /// <summary>
+    /// Smoothly interpolates the weapon's rotation over time based on the swing information provided.
+    /// </summary>
+    /// <param name="swingInfo">The data structure containing information about the swing, including duration, target location, and whether to take the long way.</param>
+    /// <returns>Coroutine for smooth animation of the weapon's rotation.</returns>
+    private IEnumerator RotateLerp(SwingInfo swingInfo)
     {
-        isAttacking = true;
-        Vector3 startRotation = transform.localRotation.eulerAngles;
+        // Record the current rotation of the weapon (Z-axis).
+        float startRotation = transform.localRotation.eulerAngles.z;
         float passedTime = 0f;
 
-        float rotationAmount = GetRotationCount(startRotation.z, finalZRot, rotPerTick);
-        float rotationPercent = GetRotationPercent(rotationAmount);
+        // Ensure the target rotation is within the valid range of 0 to 360 degrees.
+        swingInfo.rotation = Mathf.Repeat(swingInfo.rotation, 360f);
 
-        while (isAttacking)
+        // Calculate the multiplier for the "long way" rotation (if needed).
+        float zMultiplier = GetLongWayMultiplier(startRotation, swingInfo.rotation);
+
+        float zRotation = 0f;
+
+        // Continuously interpolate the rotation until the animation completes.
+        while (true)
         {
-            passedTime += Time.deltaTime * swingSpeed * (1 + (1 - rotationPercent));
-            transform.localRotation = GetRotation(startRotation, rotPerTick, rotationPercent, passedTime);
-            yield return null;
+            // Increment the elapsed time, adjusting by the animation duration.
+            passedTime += Time.deltaTime / swingInfo.duration;
 
-            if (passedTime >= 1)
+            // Depending on whether the long way is chosen, adjust the interpolation.
+            if (swingInfo.longWay)
             {
-                startRotation = transform.localRotation.eulerAngles;
-                passedTime -= 1f;
-
-                rotationAmount -= 1f;
-                rotationPercent = rotationAmount > 1f ? 1f : rotationAmount;
+                // Perform the rotation using the long path (negative multiplier).
+                zRotation = Mathf.LerpUnclamped(startRotation, swingInfo.rotation, -(passedTime * zMultiplier));
+            }
+            else
+            {
+                // Standard interpolation for the short path.
+                zRotation = Mathf.LerpUnclamped(startRotation, swingInfo.rotation, passedTime);
             }
 
-            if (rotationAmount <= 0)
+            // If the calculated rotation is invalid (NaN), reset to 0 degrees to avoid errors.
+            zRotation = float.IsNaN(zRotation) ? 0f : zRotation;
+
+            // Apply the calculated rotation to the weapon on the Z-axis.
+            transform.localRotation = Quaternion.Euler(0f, 0f, zRotation);
+
+            // Yield until the next frame to continue the animation.
+            yield return null;
+
+            // Exit the loop when the animation has completed.
+            if (passedTime >= 1f)
             {
-                isAttacking = false;
+                break;
             }
         }
 
-        transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, finalZRot));
+        // After the animation finishes, set the final rotation directly to the target location.
+        transform.localRotation = Quaternion.Euler(0f, 0f, swingInfo.rotation);
+
+        // Mark the attack as complete by resetting the coroutine reference.
+        isRotating = null;
+
+        if (swingInfo.continues)
+        {
+            attackNo++;
+            // Loop back to the first swing animation if the end of the array is reached.
+            attackNo = (int)Mathf.Repeat(attackNo, swingAnimations.Length);
+            isRotating = StartCoroutine(RotateLerp(swingAnimations[attackNo]));
+        }
     }
 
- /*   private IEnumerator PrepareWeapon(Vector3 finalRot, float rotPerTick)
+    /// <summary>
+    /// Smoothly interpolates the weapon's position over time from the current position to the target position.
+    /// </summary>
+    /// <param name="swingInfo">The data structure containing information about the swing, including duration, target location, and whether to take the long way.</param>
+    /// <returns>Coroutine for smooth animation of the weapon's rotation.</returns>
+    public IEnumerator MoveLerp(SwingInfo swingInfo)
     {
-        bool isSetting = true;
-        Vector3 startRotation = transform.localRotation.eulerAngles;
+        Vector3 startPosition = transform.localPosition; // Record the current position.
         float passedTime = 0f;
 
-        float rotationAmount = GetRotationCount(startRotation.z, finalRot.z);
-        float rotationPercent = GetRotationPercent(rotationAmount);
-
-        while (isSetting)
+        // Smoothly interpolate the position using Mathf.Lerp.
+        while (true)
         {
-            if (passedTime >= 1)
-            {
-                startRotation = transform.localRotation.eulerAngles;
-                passedTime = 0f;
+            passedTime += Time.deltaTime / swingInfo.duration;
 
-                rotationAmount -= 1f;
-                rotationPercent = rotationAmount > 1f ? 1f : rotationAmount;
-            }
+            // Interpolate the position between the start and target positions.
+            transform.localPosition = Vector3.Lerp(startPosition, swingInfo.location, passedTime);
 
-            transform.localRotation = GetRotation(startRotation, rotPerTick, rotationPercent, passedTime);
-            passedTime += Time.deltaTime * swingSpeed * (1 + (1 - rotationPercent));
+            // Yield to the next frame to continue the movement.
             yield return null;
 
-            if (rotationAmount <= 0)
+            // Exit the loop once the movement is complete.
+            if (passedTime >= 1f)
             {
-                isSetting = false;
+                break;
             }
         }
 
-    }*/
+        // Ensure the final position is exactly the target position.
+        transform.localPosition = swingInfo.location;
+
+        // Mark the rotate as complete by resetting the coroutine reference.
+        isMoving = null;
+
+        if (swingInfo.continues)
+        {
+            attackNo++;
+            // Loop back to the first swing animation if the end of the array is reached.
+            attackNo = (int)Mathf.Repeat(attackNo, swingAnimations.Length);
+            isMoving = StartCoroutine(MoveLerp(swingAnimations[attackNo]));
+        }
+    }
+
+    /// <summary>
+    /// Calculates the multiplier for the "long way" rotation between two angles, used when a full 360-degree rotation is necessary.
+    /// </summary>
+    /// <param name="startZ">The current rotation on the Z-axis.</param>
+    /// <param name="endZ">The target rotation on the Z-axis.</param>
+    /// <returns>The multiplier value for the long way rotation.</returns>
+    float GetLongWayMultiplier(float startZ, float endZ)
+    {
+        // Ensure both angles are within the 0 to 360 degree range.
+        startZ = Mathf.Repeat(startZ, 360f);
+        endZ = Mathf.Repeat(endZ, 360f);
+
+        // Compute the difference between the start and end angles.
+        float delta = Mathf.DeltaAngle(startZ, endZ);
+
+        // Calculate the angle of the shorter path.
+        float shortPathAngle = Mathf.Abs(delta);
+
+        // Calculate the long path as the remainder of 360 degrees.
+        float longPathAngle = 360f - shortPathAngle;
+
+        // The multiplier is the ratio between the long path and the short path angles.
+        float multiplier = longPathAngle / shortPathAngle;
+
+        return multiplier;
+    }
+
+    /// <summary>
+    /// Contains information for each swing animation, including duration, final rotation location, and whether to take the long way around.
+    /// </summary>
+    [Serializable]
+    public class SwingInfo
+    {
+        public float duration;  // The duration for the swing animation.
+        public Vector3 location;  // The target location location 
+        public float rotation;  // The target rotation rotation (Z-axis).
+        public bool longWay;    // A flag indicating whether to take the long way for rotation (360 degrees path).
+        public bool continues; // Continues to the next swing animation if true
+    }
 }

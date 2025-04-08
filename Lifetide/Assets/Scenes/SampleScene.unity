@@ -148,11 +148,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca6f7b112a4d85f4da32523ecfd562e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  swingSpeed: 100
-  s1FinLocation: 120
-  s2FinLocation: -150
-  isAttacking: 0
-  attackNo: 0
+  swingAnimations:
+  - duration: 0.5
+    location: {x: 0.26, y: 0.51, z: 0}
+    rotation: 120
+    longWay: 1
+    continues: 0
+  - duration: 0.5
+    location: {x: 0.26, y: 0.51, z: 0}
+    rotation: 210
+    longWay: 1
+    continues: 0
+  attackNo: -1
 --- !u!4 &298547439
 Transform:
   m_ObjectHideFlags: 0
@@ -161,7 +168,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 298547437}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: -0.9659258, w: 0.2588191}
+  m_LocalRotation: {x: 0, y: -0, z: 0.9659259, w: -0.25881898}
   m_LocalPosition: {x: 0.26, y: 0.51, z: 0}
   m_LocalScale: {x: 0.25, y: 1.8999999, z: 1}
   m_ConstrainProportionsScale: 0
@@ -169,7 +176,7 @@ Transform:
   - {fileID: 688326989}
   - {fileID: 485061077}
   m_Father: {fileID: 874881747}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -150}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 210}
 --- !u!1 &485061076
 GameObject:
   m_ObjectHideFlags: 0
