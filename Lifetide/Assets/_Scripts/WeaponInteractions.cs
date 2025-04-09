@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class WeaponInteractions : MonoBehaviour
+public class WeaponInteractions : MonoBehaviour, IWeaponStatusable
 {
     // Array holding information for each swing animation.
     public SwingInfo[] swingAnimations;
@@ -175,6 +175,17 @@ public class WeaponInteractions : MonoBehaviour
         float multiplier = longPathAngle / shortPathAngle;
 
         return multiplier;
+    }
+
+    public bool IsAttacking()
+    {
+        bool isAttacking = true;
+        if (isMoving == null && isRotating == null)
+        {
+            isAttacking = false;
+        }
+
+        return isAttacking;
     }
 
     /// <summary>
