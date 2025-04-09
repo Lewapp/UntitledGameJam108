@@ -1,42 +1,94 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class WeaponInteractions : MonoBehaviour, IWeaponStatusable
+public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseable
 {
     // Array holding information for each swing animation.
     public SwingInfo[] swingAnimations;
 
-    // Coroutine reference to track the state of the attack animation.
-    public Coroutine isRotating;
-    // Coroutine reference for handling movement animation.
-    public Coroutine isMoving;
+    public List<Coroutine> waitingList = new List<Coroutine>();
 
     // Counter to track the current attack sequence.
     public int attackNo = -1;
+
+    private bool startUpIngore = true;
 
     /// <summary>
     /// Initiates an attack based on input context, starting the rotation animation if not already attacking.
     /// </summary>
     /// <param name="context">The input context from the attack input action.</param>
-    public void Attack(InputAction.CallbackContext context)
+    public void PlayerAttack(InputAction.CallbackContext context)
     {
-        // Proceed only if an attack is not already in progress.
-        if (isRotating == null && isMoving == null)
+        Attack();
+    }
+
+    public void EnemyAttack()
+    {
+        Attack();
+    }
+
+    public void Attack()
+    {
+        if (startUpIngore)
         {
-            // Return if no swing animations are defined.
-            if (swingAnimations.Length <= 0) return;
-
-            // Increment the attack number to select the next animation.
-            attackNo++;
-            // Loop back to the first swing animation if the end of the array is reached.
-            attackNo = (int)Mathf.Repeat(attackNo, swingAnimations.Length);
-
-            // Start the rotation animation coroutine for the current attack sequence.
-            isRotating = StartCoroutine(RotateLerp(swingAnimations[attackNo]));
-            isMoving = StartCoroutine(MoveLerp(swingAnimations[attackNo]));
+            startUpIngore = false;
+            return;
         }
+
+        for (int i = 0; i < waitingList.Count; i++)
+        {
+            if (waitingList[i] != null)
+            {
+                return;
+            }
+        }
+
+        waitingList = new List<Coroutine>();
+
+        // Return if no swing animations are defined.
+        if (swingAnimations.Length <= 0) return;
+
+        // Increment the attack number to select the next animation.
+        attackNo++;
+        // Loop back to the first swing animation if the end of the array is reached.
+        attackNo = (int)Mathf.Repeat(attackNo, swingAnimations.Length);
+
+        // Start the delay coroutinebefore doing the current attack sequence.
+        waitingList.Add(StartCoroutine(DelayAttack(swingAnimations[attackNo], waitingList.Count)));
+    }
+
+    private IEnumerator DelayAttack(SwingInfo swingInfo, int listID)
+    {
+        float passedTime = 0f;
+        float passedPercent = 0f;
+        Vector3 startingScale = transform.localScale;
+
+        while (passedTime < swingInfo.delay)
+        {
+            yield return null;
+            passedTime += Time.deltaTime;
+            passedPercent = passedTime / swingInfo.delay;
+
+            transform.localScale = new Vector3(
+                startingScale.x + startingScale.x * passedPercent * swingInfo.delayScale,
+                startingScale.y + startingScale.y * passedPercent * swingInfo.delayScale,
+                startingScale.z + startingScale.z * passedPercent * swingInfo.delayScale);
+            
+        }
+
+        transform.localScale = startingScale;
+
+        // Start the rotation animation coroutine for the current attack sequence.
+        waitingList.Add(StartCoroutine(RotateLerp(swingAnimations[attackNo], waitingList.Count)));
+        // Start the movement animation coroutine simultaneously.
+        waitingList.Add(StartCoroutine(MoveLerp(swingAnimations[attackNo], waitingList.Count)));
+
+        // Mark the delay as complete by resetting the coroutine reference.
+        waitingList[listID] = null;
     }
 
     /// <summary>
@@ -44,7 +96,7 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable
     /// </summary>
     /// <param name="swingInfo">The data structure containing information about the swing, including duration, target location, and whether to take the long way.</param>
     /// <returns>Coroutine for smooth animation of the weapon's rotation.</returns>
-    private IEnumerator RotateLerp(SwingInfo swingInfo)
+    private IEnumerator RotateLerp(SwingInfo swingInfo, int listID)
     {
         // Record the current rotation of the weapon (Z-axis).
         float startRotation = transform.localRotation.eulerAngles.z;
@@ -53,7 +105,7 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable
         // Ensure the target rotation is within the valid range of 0 to 360 degrees.
         swingInfo.rotation = Mathf.Repeat(swingInfo.rotation, 360f);
 
-        // Calculate the multiplier for the "long way" rotation (if needed).
+        // Calculate the multiplier for the long way rotation (if needed).
         float zMultiplier = GetLongWayMultiplier(startRotation, swingInfo.rotation);
 
         float zRotation = 0f;
@@ -96,25 +148,18 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable
         transform.localRotation = Quaternion.Euler(0f, 0f, swingInfo.rotation);
 
         // Mark the attack as complete by resetting the coroutine reference.
-        isRotating = null;
-
-        if (swingInfo.continues)
-        {
-            attackNo++;
-            // Loop back to the first swing animation if the end of the array is reached.
-            attackNo = (int)Mathf.Repeat(attackNo, swingAnimations.Length);
-            isRotating = StartCoroutine(RotateLerp(swingAnimations[attackNo]));
-        }
+        waitingList[listID] = null;
     }
 
     /// <summary>
     /// Smoothly interpolates the weapon's position over time from the current position to the target position.
     /// </summary>
     /// <param name="swingInfo">The data structure containing information about the swing, including duration, target location, and whether to take the long way.</param>
-    /// <returns>Coroutine for smooth animation of the weapon's rotation.</returns>
-    public IEnumerator MoveLerp(SwingInfo swingInfo)
+    /// <returns>Coroutine for smooth animation of the weapon's movement.</returns>
+    public IEnumerator MoveLerp(SwingInfo swingInfo, int listID)
     {
-        Vector3 startPosition = transform.localPosition; // Record the current position.
+        // Record the current local position of the weapon.
+        Vector3 startPosition = transform.localPosition;
         float passedTime = 0f;
 
         // Smoothly interpolate the position using Mathf.Lerp.
@@ -138,16 +183,8 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable
         // Ensure the final position is exactly the target position.
         transform.localPosition = swingInfo.location;
 
-        // Mark the rotate as complete by resetting the coroutine reference.
-        isMoving = null;
-
-        if (swingInfo.continues)
-        {
-            attackNo++;
-            // Loop back to the first swing animation if the end of the array is reached.
-            attackNo = (int)Mathf.Repeat(attackNo, swingAnimations.Length);
-            isMoving = StartCoroutine(MoveLerp(swingAnimations[attackNo]));
-        }
+        // Mark the movement as complete by resetting the coroutine reference.
+        waitingList[listID] = null;
     }
 
     /// <summary>
@@ -177,27 +214,37 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable
         return multiplier;
     }
 
+    /// <summary>
+    /// Returns true if the weapon is currently performing an attack (either moving or rotating).
+    /// </summary>
     public bool IsAttacking()
     {
-        bool isAttacking = true;
-        if (isMoving == null && isRotating == null)
-        {
-            isAttacking = false;
-        }
+        bool isAttacking = false;
 
+        // Check whether either of the animation coroutines is active.
+        for (int i = 0; i < waitingList.Count; i++)
+        {
+            if (waitingList[i] != null)
+            {
+                isAttacking = true;
+                break;
+            }
+        }
         return isAttacking;
     }
 
     /// <summary>
-    /// Contains information for each swing animation, including duration, final rotation location, and whether to take the long way around.
+    /// Contains information for each swing animation, including duration, final rotation, location, and whether to take the long way around.
     /// </summary>
     [Serializable]
     public class SwingInfo
     {
-        public float duration;  // The duration for the swing animation.
-        public Vector3 location;  // The target location location 
-        public float rotation;  // The target rotation rotation (Z-axis).
-        public bool longWay;    // A flag indicating whether to take the long way for rotation (360 degrees path).
-        public bool continues; // Continues to the next swing animation if true
+        public float duration;      // The duration for the swing animation.
+        public Vector3 location;    // The target location for the swing.
+        public float rotation;      // The target Z-axis rotation.
+        public float delay;
+        public float delayScale;
+        public bool longWay;        // A flag indicating whether to take the long way for rotation (e.g., clockwise vs counter-clockwise).
+        public bool continues;      // If true, the swing automatically continues to the next one in sequence.
     }
 }
