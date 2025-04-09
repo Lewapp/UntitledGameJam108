@@ -76,7 +76,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b978fcb6b899c84c9fb59f98ef55703, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 10
+  stats: {fileID: 11400000, guid: f50cb5d3fa68c7f4e8e47667f94e5ca1, type: 2}
   hitEnemies: []
 --- !u!61 &6777982901450608903
 BoxCollider2D:
@@ -623,7 +623,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f74f3f4500237345a9ba9c6b9d6b9a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 20
+  characterStats: {fileID: 11400000, guid: 8a9698c5cac6ebc4b976dd8bccc4daf1, type: 2}
   currentHealth: 0
 --- !u!114 &5088035741098551034
 MonoBehaviour:
@@ -652,5 +652,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a48388f8b1a6d34ea3ace5b9f8c41d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weapon: {fileID: 1467343104446705273}
+  weapons:
+  - {fileID: 1467343104446705273}
   moveSpeed: 2.5

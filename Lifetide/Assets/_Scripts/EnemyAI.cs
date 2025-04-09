@@ -1,14 +1,15 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class EnemyAI : MonoBehaviour
 {
-    public GameObject weapon;
+    public GameObject[] weapons;
     public float moveSpeed = 1.0f;
 
-    private IEnemyUseable weaponUses;
-    private IWeaponStatusable weaponInfo;
+    private List<IEnemyUseable> weaponUses = new List<IEnemyUseable>();
+    private List<IWeaponStatusable> weaponInfo = new List<IWeaponStatusable>();
     private bool playerInRange = false;
     private bool attackActive = false;
 
@@ -16,10 +17,13 @@ public class EnemyAI : MonoBehaviour
 
     private void Start()
     {
-        if (weapon)
+        if (weapons.Length > 0)
         {
-            weaponUses = weapon.GetComponent<IEnemyUseable>();
-            weaponInfo = weapon.GetComponent<IWeaponStatusable>();
+            foreach (GameObject weapon in weapons)
+            {
+                weaponUses.Add(weapon.GetComponent<IEnemyUseable>());
+                weaponInfo.Add(weapon.GetComponent<IWeaponStatusable>());
+            }
         }
     }
 
@@ -29,9 +33,16 @@ public class EnemyAI : MonoBehaviour
         {
             if (!attackActive) StartCoroutine(AttackDelay(0.1f));
         }
-        else if (!weaponInfo.IsAttacking())
+        else 
         {
-            rb.linearVelocity = new Vector2(transform.up.x * moveSpeed, transform.up.y * moveSpeed);
+            foreach (IWeaponStatusable weaponI in weaponInfo)
+            {
+                if (weaponI == null) continue;
+                if (!weaponI.IsAttacking())
+                {
+                    rb.linearVelocity = new Vector2(transform.up.x * moveSpeed, transform.up.y * moveSpeed);
+                }
+            }
         }
     }
 
@@ -39,7 +50,12 @@ public class EnemyAI : MonoBehaviour
     {
         attackActive = true;
         yield return new WaitForSeconds(amount);
-        weaponUses.EnemyAttack();
+        foreach (IEnemyUseable weaponU in weaponInfo)
+        {
+            if (weaponU == null) continue;
+
+            weaponU.EnemyAttack();
+        }
         attackActive = false;
     }
 

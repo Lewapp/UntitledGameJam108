@@ -17,6 +17,8 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
 
     private bool startUpIngore = true;
 
+    public bool AttackStart { get; set; }
+
     /// <summary>
     /// Initiates an attack based on input context, starting the rotation animation if not already attacking.
     /// </summary>
@@ -52,6 +54,9 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         // Return if no swing animations are defined.
         if (swingAnimations.Length <= 0) return;
 
+        //  Claim that the attack has just started
+        StartCoroutine(AttackStartedCheck());
+
         // Increment the attack number to select the next animation.
         attackNo++;
         // Loop back to the first swing animation if the end of the array is reached.
@@ -59,6 +64,13 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
 
         // Start the delay coroutinebefore doing the current attack sequence.
         waitingList.Add(StartCoroutine(DelayAttack(swingAnimations[attackNo], waitingList.Count)));
+    }
+
+    private IEnumerator AttackStartedCheck()
+    {
+        AttackStart = true;
+        yield return null;
+        AttackStart = false;
     }
 
     private IEnumerator DelayAttack(SwingInfo swingInfo, int listID)

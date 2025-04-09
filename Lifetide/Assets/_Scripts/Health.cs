@@ -2,12 +2,12 @@ using UnityEngine;
 
 public class Health : MonoBehaviour, IDamageable
 {
-    public float maxHealth = 100;
+    public CharacterStats characterStats;
     public float currentHealth;
 
     private void Start()
     {
-        currentHealth = maxHealth;
+        currentHealth = characterStats.maxHealth;
     }
 
     public void TakeDamage(float amount)

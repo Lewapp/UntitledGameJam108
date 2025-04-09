@@ -4,14 +4,15 @@ using System.Collections.Generic;
 [RequireComponent(typeof(BoxCollider2D))]  
 public class WeaponDamage : MonoBehaviour
 {
-    // The amount of damage dealt by the weapon.
-    public float damage;
+    public WeaponStats stats;
 
     // Reference to the weapon's status interface (used to check if the weapon is attacking).
     private IWeaponStatusable weaponInfo;
 
     // List of enemies that have been hit by the weapon to avoid hitting them multiple times.
     public List<GameObject> hitEnemies;
+
+    private float currentPenPower;
 
     public void Start()
     {
@@ -32,11 +33,18 @@ public class WeaponDamage : MonoBehaviour
             {
                 hitEnemies = new List<GameObject>();  // Reset the list of enemies that have been hit.
             }
+
+            if (weaponInfo.AttackStart)
+            {
+                currentPenPower = stats.penPower;
+            }
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (collision.isTrigger || collision.tag == transform.tag) return;
+
         // If the enemy has already been hit, do not apply damage again.
         if (hitEnemies.Contains(collision.gameObject)) return;
 
@@ -44,13 +52,20 @@ public class WeaponDamage : MonoBehaviour
         if (weaponInfo.IsAttacking())
         {
             // Try to find a damageable component (i.e., an enemy) in the collided object.
-            IDamageable damageable = collision.GetComponent<IDamageable>();
+            IDamageable damageable = collision.gameObject.GetComponent<IDamageable>();
 
             // If the collided object is damageable, apply damage and add it to the hit list.
             if (damageable != null)
             {
-                damageable.TakeDamage(damage);
+                float powerPercent = currentPenPower / stats.penPower;
+
+                // TODO: STOP ENEMIES DAMAGING EACH OTHER
+
+                damageable.TakeDamage(stats.maxDamage * powerPercent);
                 hitEnemies.Add(collision.gameObject);  // Add the enemy to the list to prevent multiple hits.
+
+                currentPenPower -= 1f;
+                currentPenPower = Mathf.Clamp(currentPenPower, 0, Mathf.Infinity);
             }
         }
     }

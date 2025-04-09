@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 298547440}
   m_Layer: 0
   m_Name: Item_Weapon_Sword
-  m_TagString: Untagged
+  m_TagString: PlayerWeapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -241,7 +241,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b978fcb6b899c84c9fb59f98ef55703, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 10
+  stats: {fileID: 11400000, guid: f50cb5d3fa68c7f4e8e47667f94e5ca1, type: 2}
   hitEnemies: []
 --- !u!1 &485061076
 GameObject:
@@ -926,7 +926,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f74f3f4500237345a9ba9c6b9d6b9a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  characterStats: {fileID: 11400000, guid: 9a80aeb5d41bb4642935a5a937248c13, type: 2}
   currentHealth: 0
 --- !u!1 &1629196691
 GameObject:
@@ -1110,13 +1110,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2135388912164239379, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
+      propertyPath: weapons.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2135388912164239379, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
+      propertyPath: 'weapons.Array.data[1]'
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 7534587543385640199, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 4.43
+      value: 4.72
       objectReference: {fileID: 0}
     - target: {fileID: 7534587543385640199, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.45
+      value: 2.92
       objectReference: {fileID: 0}
     - target: {fileID: 7534587543385640199, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
       propertyPath: m_LocalPosition.z
