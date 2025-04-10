@@ -2,10 +2,15 @@ using UnityEngine;
 
 public class WeaponInfo : MonoBehaviour, IWeaponReadable
 {
-    public GameObject currentWeapon;
+    #region Properties and References
 
-    public GameObject weapon { get; set; }
-    public IWeaponStatusable weaponStatus { get; set; }
+    public IWeaponStatusable weaponStatus { get; set; }     // Interface reference for accessing weapon status functionality
+    public GameObject weapon { get; set; }                  // The weapon being tracked, with public getter and setter
+
+    public GameObject currentWeapon;                        // The currently equipped weapon GameObject, assigned via the Inspector
+
+
+    #endregion
 
     private void Awake()
     {
@@ -17,11 +22,15 @@ public class WeaponInfo : MonoBehaviour, IWeaponReadable
         UpdateWeaponInfo();
     }
 
+    // Updates the internal weapon information based on the currentWeapon reference
     private void UpdateWeaponInfo()
     {
         if (currentWeapon)
         {
+            // Assigns the current weapon to the internal weapon reference
             weapon = currentWeapon;
+
+            // Retrieves the IWeaponStatusable component only if not already set
             if (weaponStatus == null)
             {
                 weaponStatus = weapon.GetComponent<IWeaponStatusable>();

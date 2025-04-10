@@ -49,7 +49,7 @@ public class WeaponDamage : MonoBehaviour
         // Check if the weapon is currently attacking.
         if (weaponStatus.IsAttacking())
         {
-            // Try to find a damageable component (i.e., an enemy) in the collided object.
+            // Try to find a damageable component (i.e. an enemy) in the collided object.
             IDamageable damageable = collision.gameObject.GetComponent<IDamageable>();
 
             // If the collided object is damageable, apply damage and add it to the hit list.

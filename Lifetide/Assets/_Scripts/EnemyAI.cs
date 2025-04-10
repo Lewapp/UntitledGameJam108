@@ -3,20 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class EnemyAI : MonoBehaviour
 {
-    public GameObject[] weapons;
-    public float moveSpeed = 1.0f;
+    public GameObject[] weapons;            // Array of weapons the enemy can use
+    public float moveSpeed = 1.0f;          // Movement speed of the enemy when approaching the player
 
+    // Internal lists to store weapon behaviours and status info
     private List<IEnemyUseable> weaponUses = new List<IEnemyUseable>();
     private List<IWeaponStatusable> weaponInfo = new List<IWeaponStatusable>();
-    private bool playerInRange = false;
-    private bool attackActive = false;
+    private bool playerInRange = false;     // Tracks if the player is currently within range
+    private bool attackActive = false;      // Used to prevent the enemy from spamming attacks too rapidly
 
-    private Rigidbody2D rb { get => GetComponent<Rigidbody2D>(); } // Reference to Rigidbody2D
+    // Quick reference to the Rigidbody2D component
+    private Rigidbody2D rb { get => GetComponent<Rigidbody2D>(); }
 
     private void Start()
     {
+        // Gather usable weapons and their interfaces at the start
         if (weapons.Length > 0)
         {
             foreach (GameObject weapon in weapons)
@@ -29,15 +33,20 @@ public class EnemyAI : MonoBehaviour
 
     private void Update()
     {
+        // If the player is close enough and weapons exist, try to attack
         if (playerInRange && weaponUses != null)
         {
-            if (!attackActive) StartCoroutine(AttackDelay(0.1f));
+            if (!attackActive)
+                StartCoroutine(AttackDelay(0.1f)); // Add a slight delay between attacks
         }
-        else 
+        else
         {
+            // If not attacking, continue moving forward
             foreach (IWeaponStatusable weaponI in weaponInfo)
             {
                 if (weaponI == null) continue;
+
+                // Only move if the weapon is not mid-attack
                 if (!weaponI.IsAttacking())
                 {
                     rb.linearVelocity = new Vector2(transform.up.x * moveSpeed, transform.up.y * moveSpeed);
@@ -46,19 +55,24 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    // Coroutine that handles the delay between enemy attacks
     private IEnumerator AttackDelay(float amount)
     {
         attackActive = true;
         yield return new WaitForSeconds(amount);
+
         foreach (IEnemyUseable weaponU in weaponInfo)
         {
             if (weaponU == null) continue;
 
+            // Perform the attack using the weapon's interface
             weaponU.EnemyAttack();
         }
+
         attackActive = false;
     }
 
+    // Detects if the player stays within the enemy's trigger area
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
@@ -67,6 +81,7 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    // Detects when the player leaves the enemy's trigger area
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
@@ -74,5 +89,4 @@ public class EnemyAI : MonoBehaviour
             playerInRange = false;
         }
     }
-
 }

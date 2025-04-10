@@ -1,24 +1,28 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using NUnit.Framework;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseable
 {
+    #region Properties and References
+
     public bool AttackStart { get; set; }
     public bool IsBlocking { get; set; }
     public bool CanBlock { get; set; }
 
-    public WeaponStats stats;
-    public SwingInfo[] swingAnimations; // Array holding information for each swing animation.
-    public SwingInfo[] blockAnimations;
+    public WeaponStats stats;               // The stats of the weapon being used
+    public SwingInfo[] swingAnimations;     // Swing animations to cycle through when attacking.
+    public SwingInfo[] blockAnimations;     // Block animations for entering and exiting block state.
 
-    private List<Coroutine> waitingList;
-    private int attackNo = -1; // Counter to track the current attack sequence.
-    private bool startUpIngore = true;
+    private List<Coroutine> waitingList;    // Tracks the status of started coroutines
+    private int attackNo = -1;              // Tracks the current index in the attack animation sequence.
+    private bool startUpIgnore = true;      // Ignores the first startup input (useful for input buffering quirks).
+
+    #endregion
+
+    #region Unity Callbacks
 
     private void Awake()
     {
@@ -30,65 +34,89 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     {
         CheckWaitingListActive();
 
+        // Automatically break block if no longer able to block while currently blocking.
         if (IsBlocking && !CanBlock)
         {
             BreakShield();
         }
     }
 
+    #endregion
+
+    #region Input Callbacks
+
+    /// <summary>
+    /// Input callback for triggering a attack action.
+    /// </summary>
+    /// <param name="context">The input context from the block input action.</param>
+    public void PlayerAttack(InputAction.CallbackContext context)
+    {
+        Attack();
+    }
+
+    /// <summary>
+    /// Input callback for triggering a block action.
+    /// </summary>
+    /// <param name="context">The input context from the block input action.</param>
     public void PlayerBlock(InputAction.CallbackContext context)
     {
         Block();
     }
 
+    /// <summary>
+    /// Triggers an attack from an enemy using this weapon. Mirrors the player attack behavior.
+    /// </summary>
+    public void EnemyAttack()
+    {
+        Attack();
+    }
+
+    #endregion
+
+    #region Blocking Logic
+
+    /// <summary>
+    /// Toggles block state with animations, unless already performing an action or block is disabled.
+    /// </summary>
     private void Block()
     {
         if (waitingList.Count > 0 || !CanBlock)
-        {
             return;
-        }
 
-        switch (IsBlocking)
+        if (IsBlocking)
         {
-            case true:
-                IsBlocking = false;
-                // Start the delay coroutine before doing the current attack sequence.
-                waitingList.Add(StartCoroutine(DelayAttack(blockAnimations[1], waitingList.Count)));
-                break;
-            case false:
-                IsBlocking = true;
-                // Start the delay coroutine before doing the current attack sequence.
-                waitingList.Add(StartCoroutine(DelayAttack(blockAnimations[0], waitingList.Count)));
-                break;
+            IsBlocking = false;
+            waitingList.Add(StartCoroutine(DelayAttack(blockAnimations[1], waitingList.Count)));
         }
-
+        else
+        {
+            IsBlocking = true;
+            waitingList.Add(StartCoroutine(DelayAttack(blockAnimations[0], waitingList.Count)));
+        }
     }
 
+    /// <summary>
+    /// Forces the player to exit the blocking state and plays the unblock animation.
+    /// </summary>
     public void BreakShield()
     {
         IsBlocking = false;
         waitingList.Add(StartCoroutine(DelayAttack(blockAnimations[1], waitingList.Count)));
     }
 
+    #endregion
+
+    #region Attacking Logic
+
     /// <summary>
-    /// Initiates an attack based on input context, starting the rotation animation if not already attacking.
+    /// Handles the logic for initiating an attack, including animation sequence rotation.
+    /// Skips the first input to ignore accidental early inputs after startup.
     /// </summary>
-    /// <param name="context">The input context from the attack input action.</param>
-    public void PlayerAttack(InputAction.CallbackContext context)
-    {
-        Attack();
-    }
-
-    public void EnemyAttack()
-    {
-        Attack();
-    }
-
     private void Attack()
     {
-        if (startUpIngore)
+        if (startUpIgnore)
         {
-            startUpIngore = false;
+            startUpIgnore = false;
             return;
         }
 
@@ -107,24 +135,13 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         // Loop back to the first swing animation if the end of the array is reached.
         attackNo = (int)Mathf.Repeat(attackNo, swingAnimations.Length);
 
-        // Start the delay coroutinebefore doing the current attack sequence.
+        // Start the delay coroutine before doing the current attack sequence.
         waitingList.Add(StartCoroutine(DelayAttack(swingAnimations[attackNo], waitingList.Count)));
     }
 
-    private bool CheckWaitingListActive()
-    {
-        for (int i = 0; i < waitingList.Count; i++)
-        {
-            if (waitingList[i] != null)
-            {
-                return true;
-            }
-        }
-
-        waitingList = new List<Coroutine>();
-        return false;
-    }    
-
+    /// <summary>
+    /// Temporarily sets AttackStart to true for one frame.
+    /// </summary>
     private IEnumerator AttackStartedCheck()
     {
         AttackStart = true;
@@ -132,197 +149,221 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         AttackStart = false;
     }
 
+    /// <summary>
+    /// Returns true if the weapon is in the middle of a movement or rotation animation.
+    /// </summary>
+    /// <returns>True if any attack animation is active, false otherwise.</returns>
+    public bool IsAttacking()
+    {
+        // If blocking, attacking is not allowed.
+        if (IsBlocking) return false;
+
+        // Check if any coroutine is still running.
+        foreach (var coroutine in waitingList)
+        {
+            if (coroutine != null)
+                return true;
+        }
+
+        // No active animations found.
+        return false;
+    }
+
+    #endregion
+
+    #region Coroutines
+
+    /// <summary>
+    /// Delays the attack to create anticipation before the actual swing (Purely used for enemies but can be used for player),
+    /// applying a scale animation during the delay, then starts movement and rotation coroutines.
+    /// </summary>
+    /// <param name="swingInfo">The configuration for the swing, including delay duration and scale factor.</param>
+    /// <param name="listID">The index in the waiting list this coroutine occupies, used to mark completion.</param>
     private IEnumerator DelayAttack(SwingInfo swingInfo, int listID)
-    {     
+    {
+        // Track the elapsed time during the delay.
         float passedTime = 0f;
-        float passedPercent = 0f;
+        // Store the initial scale of the object to revert after the delay.
         Vector3 startingScale = transform.localScale;
 
+        // Perform the delay, increasing the scale slightly over time to add visual anticipation.
         while (passedTime < swingInfo.delay)
         {
-            yield return null;
-            passedTime += Time.deltaTime;
-            passedPercent = passedTime / swingInfo.delay;
+            yield return null; // Wait for the next frame.
 
+            passedTime += Time.deltaTime;
+            float passedPercent = passedTime / swingInfo.delay;
+
+            // Scale the object proportionally based on how much time has passed.
             transform.localScale = new Vector3(
                 startingScale.x + startingScale.x * passedPercent * swingInfo.delayScale,
                 startingScale.y + startingScale.y * passedPercent * swingInfo.delayScale,
-                startingScale.z + startingScale.z * passedPercent * swingInfo.delayScale);
-            
+                startingScale.z + startingScale.z * passedPercent * swingInfo.delayScale
+            );
         }
+
+        // Reset the scale to its original size after the delay.
         transform.localScale = startingScale;
-        
-        // Start the rotation animation coroutine for the current attack sequence.
+
+        // After the delay ends, start the actual swing motion:
+        // Add rotation animation coroutine.
         waitingList.Add(StartCoroutine(RotateLerp(swingInfo, waitingList.Count)));
-        // Start the movement animation coroutine simultaneously.
+
+        // Add movement animation coroutine.
         waitingList.Add(StartCoroutine(MoveLerp(swingInfo, waitingList.Count)));
 
-        // Mark the delay as complete by resetting the coroutine reference.
+        // Mark this delay coroutine as completed in the waiting list.
         waitingList[listID] = null;
     }
 
     /// <summary>
-    /// Smoothly interpolates the weapon's rotation over time based on the swing information provided.
-    /// </summary>
-    /// <param name="swingInfo">The data structure containing information about the swing, including duration, target location, and whether to take the long way.</param>
-    /// <returns>Coroutine for smooth animation of the weapon's rotation.</returns>
+    /// Rotates the weapon over time based on the swing info.
+    /// </summary>    
+    /// <param name="swingInfo">The configuration for the swing, including delay duration and scale factor.</param>
+    /// <param name="listID">The index in the waiting list this coroutine occupies, used to mark completion.</param>
     private IEnumerator RotateLerp(SwingInfo swingInfo, int listID)
     {
-        // Record the current rotation of the weapon (Z-axis).
+        // Get the starting rotation on the Z-axis.
         float startRotation = transform.localRotation.eulerAngles.z;
         float passedTime = 0f;
 
-        // Ensure the target rotation is within the valid range of 0 to 360 degrees.
+        // Normalise the target rotation to within 0–360 degrees.
         swingInfo.rotation = Mathf.Repeat(swingInfo.rotation, 360f);
 
-        // Calculate the multiplier for the long way rotation (if needed).
+        // Get a multiplier for long-way rotation if applicable.
         float zMultiplier = GetLongWayMultiplier(startRotation, swingInfo.rotation);
-
         float zRotation = 0f;
 
-        // Continuously interpolate the rotation until the animation completes.
         while (true)
         {
-            // Increment the elapsed time, adjusting by the animation duration.
+            // Increase the interpolation time factor based on duration.
             passedTime += Time.deltaTime / swingInfo.duration;
 
-            // Depending on whether the long way is chosen, adjust the interpolation.
-            if (swingInfo.longWay)
-            {
-                // Perform the rotation using the long path (negative multiplier).
-                zRotation = Mathf.LerpUnclamped(startRotation, swingInfo.rotation, -(passedTime * zMultiplier));
-            }
-            else
-            {
-                // Standard interpolation for the short path.
-                zRotation = Mathf.LerpUnclamped(startRotation, swingInfo.rotation, passedTime);
-            }
+            // Choose long-way or short-way interpolation.
+            zRotation = swingInfo.longWay
+                ? Mathf.LerpUnclamped(startRotation, swingInfo.rotation, -(passedTime * zMultiplier))
+                : Mathf.LerpUnclamped(startRotation, swingInfo.rotation, passedTime);
 
+            // Normalise the rotation and prevent NaN.
             zRotation = Mathf.Repeat(zRotation, 360f);
-            // If the calculated rotation is invalid (NaN), reset to 0 degrees to avoid errors.
             zRotation = float.IsNaN(zRotation) ? 0f : zRotation;
 
-            // Apply the calculated rotation to the weapon on the Z-axis.
+            // Apply the interpolated rotation to the weapon.
             transform.localRotation = Quaternion.Euler(0f, 0f, zRotation);
 
-            // Yield until the next frame to continue the animation.
             yield return null;
 
-            // Exit the loop when the animation has completed.
+            // Break once the full interpolation time has passed.
             if (passedTime >= 1f)
-            {
                 break;
-            }
         }
 
-        // After the animation finishes, set the final rotation directly to the target location.
+        // Snap to final rotation to ensure exact value.
         transform.localRotation = Quaternion.Euler(0f, 0f, swingInfo.rotation);
 
-        // Mark the attack as complete by resetting the coroutine reference.
+        // Mark coroutine as complete.
         waitingList[listID] = null;
     }
 
     /// <summary>
-    /// Smoothly interpolates the weapon's position over time from the current position to the target position.
+    /// Moves the weapon over time to the specified local position.
     /// </summary>
-    /// <param name="swingInfo">The data structure containing information about the swing, including duration, target location, and whether to take the long way.</param>
-    /// <returns>Coroutine for smooth animation of the weapon's movement.</returns>
+    /// <param name="swingInfo">The configuration for the swing, including delay duration and scale factor.</param>
+    /// <param name="listID">The index in the waiting list this coroutine occupies, used to mark completion.</param>
     public IEnumerator MoveLerp(SwingInfo swingInfo, int listID)
     {
-        // Record the current local position of the weapon.
+        // Store the starting local position of the weapon.
         Vector3 startPosition = transform.localPosition;
         float passedTime = 0f;
 
-        // Smoothly interpolate the position using Mathf.Lerp.
         while (true)
         {
+            // Incrementally progress based on duration.
             passedTime += Time.deltaTime / swingInfo.duration;
 
-            // Interpolate the position between the start and target positions.
+            // Linearly interpolate from the start to the target position.
             transform.localPosition = Vector3.Lerp(startPosition, swingInfo.location, passedTime);
 
-            // Yield to the next frame to continue the movement.
             yield return null;
 
-            // Exit the loop once the movement is complete.
+            // Exit once interpolation is complete.
             if (passedTime >= 1f)
-            {
                 break;
-            }
         }
 
-        // Ensure the final position is exactly the target position.
+        // Snap to final position to avoid floating-point inaccuracies.
         transform.localPosition = swingInfo.location;
 
-        // Mark the movement as complete by resetting the coroutine reference.
+        // Mark coroutine as complete.
         waitingList[listID] = null;
     }
 
-    /// <summary>
-    /// Calculates the multiplier for the "long way" rotation between two angles, used when a full 360-degree rotation is necessary.
-    /// </summary>
-    /// <param name="startZ">The current rotation on the Z-axis.</param>
-    /// <param name="endZ">The target rotation on the Z-axis.</param>
-    /// <returns>The multiplier value for the long way rotation.</returns>
-    float GetLongWayMultiplier(float startZ, float endZ)
-    {
-        // Ensure both angles are within the 0 to 360 degree range.
-        startZ = Mathf.Repeat(startZ, 360f);
-        endZ = Mathf.Repeat(endZ, 360f);
+    #endregion
 
-        // Compute the difference between the start and end angles.
-        float delta = Mathf.DeltaAngle(startZ, endZ);
-
-        // Calculate the angle of the shorter path.
-        float shortPathAngle = Mathf.Abs(delta);
-
-        // Calculate the long path as the remainder of 360 degrees.
-        float longPathAngle = 360f - shortPathAngle;
-
-        // The multiplier is the ratio between the long path and the short path angles.
-        float multiplier = longPathAngle / shortPathAngle;
-
-        return multiplier;
-    }
+    #region Helpers
 
     /// <summary>
-    /// Returns true if the weapon is currently performing an attack (either moving or rotating).
+    /// Returns true if any actions are currently in progress. Resets the list if all coroutines are complete.
     /// </summary>
-    public bool IsAttacking()
+    private bool CheckWaitingListActive()
     {
-        bool isAttacking = false;
-
-        if (IsBlocking) return isAttacking;
-
-        // Check whether either of the animation coroutines is active.
         for (int i = 0; i < waitingList.Count; i++)
         {
             if (waitingList[i] != null)
-            {
-                isAttacking = true;
-                break;
-            }
+                return true;
         }
-        return isAttacking;
+
+        waitingList = new List<Coroutine>();
+        return false;
     }
+
+    /// <summary>
+    /// Calculates a multiplier for long-way rotation interpolation.
+    /// </summary>
+    /// <param name="startZ">The starting rotation angle on the Z-axis.</param>
+    /// <param name="endZ">The target rotation angle on the Z-axis.</param>
+    /// <returns>A multiplier used to force long way on lerping</returns>
+    private float GetLongWayMultiplier(float startZ, float endZ)
+    {
+        // Normalise both angles to within 0–360 degrees.
+        startZ = Mathf.Repeat(startZ, 360f);
+        endZ = Mathf.Repeat(endZ, 360f);
+
+        // Calculate the angular difference using Unity’s helper.
+        float delta = Mathf.DeltaAngle(startZ, endZ);
+
+        // Determine short and long path distances.
+        float shortPathAngle = Mathf.Abs(delta);
+        float longPathAngle = 360f - shortPathAngle;
+
+        // Return a multiplier used to scale the long-path interpolation.
+        return longPathAngle / shortPathAngle;
+    }
+
 
     public WeaponStats GetWeaponStats()
     {
         return stats;
     }
 
+    #endregion
+
+    #region Subclasses
+
     /// <summary>
-    /// Contains information for each swing animation, including duration, final rotation, location, and whether to take the long way around.
+    /// Defines timing and animation parameters for attacks or blocks.
     /// </summary>
     [Serializable]
     public class SwingInfo
     {
-        public float duration;      // The duration for the swing animation.
-        public Vector3 location;    // The target location for the swing.
-        public float rotation;      // The target Z-axis rotation.
-        public float delay;
-        public float delayScale;
-        public bool longWay;        // A flag indicating whether to take the long way for rotation (e.g., clockwise vs counter-clockwise).
-        public bool continues;      // If true, the swing automatically continues to the next one in sequence.
+        public float duration;       // Time it takes to perform the animation.
+        public Vector3 location;     // Target local position of the weapon.
+        public float rotation;       // Target local Z rotation.
+        public float delay;          // Time to wait before the animation starts.
+        public float delayScale;     // How much the weapon scales during delay.
+        public bool longWay;         // Use long rotation path (e.g., clockwise 270° instead of counter-clockwise 90°).
+        public bool continues;       // If true, auto-continue to the next attack in sequence.
     }
+
+    #endregion
 }

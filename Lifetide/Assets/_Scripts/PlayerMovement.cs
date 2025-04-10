@@ -3,71 +3,81 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using static UiInfoStore;
 
-/// <summary>
-/// Handles player movement using Unity's Input System.
-/// Requires a Rigidbody2D component for physics-based movement.
-/// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovement : MonoBehaviour, IUiReadable
 {
-    public float moveSpeed; // Normal movement speed multiplier
-    public float shieldedMoveSpeed; // Normal movement speed multiplier
-    public float dashSpeed; // Dash speed multiplier
-    public float weakDashNerf; // Weak dash speed multiplier per extra dash
-    public float dashDuration; // Duration of dash
-    public float dashCooldown; // Cooldown time between dashes
-    public float maxDashAmount; // Amount of dashes within 1 cooldown allowed
-    public float maxWeakDashAmount; // Amount of dashes within 1 cooldown allowed
+    [Header("Movement Settings")]
+    public float moveSpeed;              // Normal movement speed multiplier
+    public float shieldedMoveSpeed;      // Movement speed while blocking
+    public float dashSpeed;              // Dash speed multiplier
+    public float weakDashNerf;           // Speed reduction for weak dashes (after main dashes run out)
+    public float dashDuration;           // Duration the dash lasts
+    public float dashCooldown;           // Time before dashes replenish
+    public float maxDashAmount;          // Max amount of strong dashes available before cooldown
+    public float maxWeakDashAmount;      // Max total amount of weak + strong dashes allowed before cooldown
 
-    private Rigidbody2D rb { get => GetComponent<Rigidbody2D>(); } // Reference to Rigidbody2D
-    private Vector2 moveDirection; // Current input direction
-    private Vector2 dashDirection; // Remembered input direction
-    private bool isDashing = false; // To track whether the player is currently dashing
-    private float dashTime = 0f; // Timer for dash duration
-    private float cooldownTime = 0f; // Timer for dash cooldown
-    private float dashAmount = 1f; // Amount of dashes left
+    private Rigidbody2D rb { get => GetComponent<Rigidbody2D>(); } // Cached reference to Rigidbody2D
+    private Vector2 moveDirection;       // Direction of player movement from input
+    private Vector2 dashDirection;       // Stored direction for dash movement
+    private bool isDashing = false;      // Whether the player is currently dashing
+    private float dashTime = 0f;         // Current dash timer
+    private float cooldownTime = 0f;     // Cooldown timer for dash replenishment
+    private float dashAmount = 1f;       // Current number of available dashes
 
-    private IWeaponReadable currrentWeapon;
-    private IDamageable thisHealth;
-    private IWeaponStatusable thisWeapon;
+    private IWeaponReadable currrentWeapon;     // Interface for current weapon reference
+    private IDamageable thisHealth;             // Interface for health and invincibility control
+    private IWeaponStatusable thisWeapon;       // Interface for weapon-specific stats and states
 
     private void Start()
     {
         dashAmount = maxDashAmount;
 
+        // Get components implementing damageable and weapon-readable interfaces
         thisHealth = GetComponent<IDamageable>();
-
         currrentWeapon = GetComponent<IWeaponReadable>();
-        if (currrentWeapon != null) thisWeapon = currrentWeapon.weapon.GetComponent<IWeaponStatusable>();
+        if (currrentWeapon != null)
+            thisWeapon = currrentWeapon.weapon.GetComponent<IWeaponStatusable>();
 
+        // Set movement stats based on current weapon or default
         SetMovementStats();
     }
 
     private void Update()
     {
         ApplyMovement();
+        ApplyDash();
+    }
 
-        // Handle dash timer
+    /// <summary>
+    /// Applies dash movement each frame if dashing is active, including full or weakened dash speed based on remaining charges.
+    /// Handles dash duration countdown and replenishes dash charges after the cooldown period ends.
+    /// </summary>
+    private void ApplyDash()
+    {
+        // Handle dash movement
         if (isDashing)
         {
             if (dashAmount > 0)
             {
-                rb.linearVelocity += dashDirection * dashSpeed; // Apply the dash speed in the move direction
+                // Apply full dash speed
+                rb.linearVelocity += dashDirection * dashSpeed;
             }
             else
             {
-                rb.linearVelocity += dashDirection * (dashSpeed - dashSpeed * weakDashNerf * Mathf.Abs(dashAmount)); // Apply the weak dash speed in the move direction
+                // Apply weaker dash if strong dashes are depleted
+                rb.linearVelocity += dashDirection * (dashSpeed - dashSpeed * weakDashNerf * Mathf.Abs(dashAmount));
             }
 
+            // Reduce dash timer
             dashTime -= Time.deltaTime;
-            if (dashTime <= 0f) // Dash has finished
+            if (dashTime <= 0f)
             {
-                isDashing = false;
+                isDashing = false; // End dash
             }
         }
         else
         {
-            // Handle cooldown timer
+            // Handle cooldown for restoring dash charges
             if (cooldownTime > 0f)
             {
                 cooldownTime -= Time.deltaTime;
@@ -79,6 +89,9 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
         }
     }
 
+    /// <summary>
+    /// Applies current movement velocity based on direction and weapon/blocking status.
+    /// </summary>
     private void ApplyMovement()
     {
         if (currrentWeapon?.weaponStatus?.IsBlocking == true)
@@ -91,9 +104,11 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
         }
     }
 
+    /// <summary>
+    /// Sets movement-related stats from the weapon or uses default values if unavailable.
+    /// </summary>
     private void SetMovementStats()
     {
-        // If no weapon then use defaults
         if (thisWeapon == null || currrentWeapon == null)
         {
             Debug.LogWarning("Using default movement stats");
@@ -108,13 +123,14 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
             return;
         }
 
-        moveSpeed = thisWeapon.GetWeaponStats().moveSpeed; 
-        shieldedMoveSpeed = thisWeapon.GetWeaponStats().shieldedMovement; 
-        dashSpeed = thisWeapon.GetWeaponStats().dashSpeed; 
-        weakDashNerf = thisWeapon.GetWeaponStats().weakDashNerf; 
-        dashDuration = thisWeapon.GetWeaponStats().dashDuration; 
-        dashCooldown = thisWeapon.GetWeaponStats().dashCooldown; 
-        maxDashAmount = thisWeapon.GetWeaponStats().maxDashAmount; 
+        // Retrieve stats from weapon interface
+        moveSpeed = thisWeapon.GetWeaponStats().moveSpeed;
+        shieldedMoveSpeed = thisWeapon.GetWeaponStats().shieldedMovement;
+        dashSpeed = thisWeapon.GetWeaponStats().dashSpeed;
+        weakDashNerf = thisWeapon.GetWeaponStats().weakDashNerf;
+        dashDuration = thisWeapon.GetWeaponStats().dashDuration;
+        dashCooldown = thisWeapon.GetWeaponStats().dashCooldown;
+        maxDashAmount = thisWeapon.GetWeaponStats().maxDashAmount;
         maxWeakDashAmount = thisWeapon.GetWeaponStats().maxWeakDashAmount;
     }
 
@@ -129,23 +145,27 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
     }
 
     /// <summary>
-    /// Called when the dash action is triggered by the input system.
-    /// Starts the dash and applies dash speed temporarily.
+    /// Called by the Input System when the dash action is triggered.
+    /// Starts a dash if possible and handles dash logic.
     /// </summary>
     /// <param name="context">The input context for the dash action.</param>
     public void Dash(InputAction.CallbackContext context)
     {
         Vector2 forward = new Vector2(transform.up.x, transform.up.y);
+
+        // Prevent dashing in a direction not aligned enough with forward
         if (Vector2.Dot(moveDirection.normalized, forward) > 1.1f) return;
 
-        if (context.started && !isDashing && (Mathf.Abs(dashAmount) < maxWeakDashAmount)) 
+        // Only allow dash if not currently dashing and max weak dashes not exceeded
+        if (context.started && !isDashing && (Mathf.Abs(dashAmount) < maxWeakDashAmount))
         {
             isDashing = true;
-            dashTime = dashDuration; // Set the dash duration
-            cooldownTime = dashCooldown; // Reset the cooldown
-            dashDirection = moveDirection;
-            dashAmount--;
+            dashTime = dashDuration;           // Set dash duration
+            cooldownTime = dashCooldown;       // Start cooldown timer
+            dashDirection = moveDirection;     // Store dash direction
+            dashAmount--;                      // Reduce dash count
 
+            // Grant temporary invincibility during normal dashes
             if (dashAmount > 0)
             {
                 ApplyInvincibility(dashDuration + (dashAmount * 0.2f));
@@ -153,17 +173,30 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
         }
     }
 
+    /// <summary>
+    /// Grants temporary invincibility [Title Card] to the player. 
+    /// </summary>
+    /// <param name="amount">Duration of invincibility.</param>
     private void ApplyInvincibility(float amount)
     {
         if (thisHealth == null) return;
 
+        // Apply invincibility status via damageable interface
         thisHealth.SetInvincibilityTime(amount, false);
     }
 
+    /// <summary>
+    /// Returns dash-related UI information for display purposes.
+    /// </summary>
+    /// <returns>A UiInfoStore with current dash count info.</returns>
     public UiInfoStore GetInfo()
     {
         UiInfoStore infoStore = new UiInfoStore();
+
+        // Set current dash count in UI
         infoStore.SetInfo(UiInfoType.Dashes, dashAmount);
+
+        // Mark as unlocked to allow it to be read
         infoStore.SetInfoLock(UiInfoType.Dashes, true);
 
         return infoStore;
