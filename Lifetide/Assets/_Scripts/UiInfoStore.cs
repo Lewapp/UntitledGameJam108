@@ -49,6 +49,8 @@ public class UiInfoStore
     public enum UiInfoType
     {
         None,
-        Health
+        Health,
+        Shield,
+        Dashes
     }
 }

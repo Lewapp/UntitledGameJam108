@@ -6,6 +6,8 @@ using static UiInfoStore;
 public class UIUpdater : MonoBehaviour
 {
     public TextMeshProUGUI healthTXT;
+    public TextMeshProUGUI shieldTXT;
+    public TextMeshProUGUI dashesTXT;
 
     public GameObject player;
 
@@ -15,8 +17,10 @@ public class UIUpdater : MonoBehaviour
     {
         if (player)
         {
-            IUiReadable playerUI = player.GetComponent<IUiReadable>();
-            if (playerUI != null) uiReadings.Add(playerUI);
+            foreach (IUiReadable playerUI in player.GetComponents<IUiReadable>())
+            {
+                uiReadings.Add(playerUI);
+            }
         }
     }
 
@@ -29,6 +33,16 @@ public class UIUpdater : MonoBehaviour
             {
                 thisInfoStore.TryGetInfo(UiInfoType.Health, out float health);
                 healthTXT.text = "Health: " + health;
+            }
+            if (thisInfoStore.CheckInfoLock(UiInfoType.Shield))
+            {
+                thisInfoStore.TryGetInfo(UiInfoType.Shield, out int shield);
+                shieldTXT.text = "Shield: " + shield;
+            }
+            if (thisInfoStore.CheckInfoLock(UiInfoType.Dashes))
+            {
+                thisInfoStore.TryGetInfo(UiInfoType.Dashes, out float dashes);
+                dashesTXT.text = "Dashes: " + dashes;
             }
         }
     }

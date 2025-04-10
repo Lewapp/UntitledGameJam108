@@ -1,23 +1,23 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using static UiInfoStore;
 
 /// <summary>
 /// Handles player movement using Unity's Input System.
 /// Requires a Rigidbody2D component for physics-based movement.
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : MonoBehaviour, IUiReadable
 {
-    public GameObject currrentWeapon;
-
-    public float moveSpeed = 5.0f; // Normal movement speed multiplier
-    public float dashSpeed = 10.0f; // Dash speed multiplier
-    public float weakDashNerf = 0.5f; // Weak dash speed multiplier per extra dash
-    public float dashDuration = 0.2f; // Duration of dash
-    public float dashCooldown = 1.0f; // Cooldown time between dashes
-    public float maxDashAmount = 1f; // Amount of dashes within 1 cooldown allowed
-    public float maxWeakDashAmount = 4f; // Amount of dashes within 1 cooldown allowed
+    public float moveSpeed; // Normal movement speed multiplier
+    public float shieldedMoveSpeed; // Normal movement speed multiplier
+    public float dashSpeed; // Dash speed multiplier
+    public float weakDashNerf; // Weak dash speed multiplier per extra dash
+    public float dashDuration; // Duration of dash
+    public float dashCooldown; // Cooldown time between dashes
+    public float maxDashAmount; // Amount of dashes within 1 cooldown allowed
+    public float maxWeakDashAmount; // Amount of dashes within 1 cooldown allowed
 
     private Rigidbody2D rb { get => GetComponent<Rigidbody2D>(); } // Reference to Rigidbody2D
     private Vector2 moveDirection; // Current input direction
@@ -27,6 +27,7 @@ public class PlayerMovement : MonoBehaviour
     private float cooldownTime = 0f; // Timer for dash cooldown
     private float dashAmount = 1f; // Amount of dashes left
 
+    private IWeaponReadable currrentWeapon;
     private IDamageable thisHealth;
     private IWeaponStatusable thisWeapon;
 
@@ -35,14 +36,16 @@ public class PlayerMovement : MonoBehaviour
         dashAmount = maxDashAmount;
 
         thisHealth = GetComponent<IDamageable>();
-        if (currrentWeapon) thisWeapon = currrentWeapon.GetComponent<IWeaponStatusable>();
+
+        currrentWeapon = GetComponent<IWeaponReadable>();
+        if (currrentWeapon != null) thisWeapon = currrentWeapon.weapon.GetComponent<IWeaponStatusable>();
 
         SetMovementStats();
     }
 
     private void Update()
     {
-        rb.linearVelocity = moveDirection * moveSpeed;
+        ApplyMovement();
 
         // Handle dash timer
         if (isDashing)
@@ -76,13 +79,26 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void ApplyMovement()
+    {
+        if (currrentWeapon?.weaponStatus?.IsBlocking == true)
+        {
+            rb.linearVelocity = moveDirection * shieldedMoveSpeed;
+        }
+        else
+        {
+            rb.linearVelocity = moveDirection * moveSpeed;
+        }
+    }
+
     private void SetMovementStats()
     {
         // If no weapon then use defaults
-        if (thisWeapon == null || !currrentWeapon)
+        if (thisWeapon == null || currrentWeapon == null)
         {
             Debug.LogWarning("Using default movement stats");
             moveSpeed = 15f;
+            shieldedMoveSpeed = 7f;
             dashSpeed = 40f;
             weakDashNerf = 0.3f;
             dashDuration = 0.1f;
@@ -93,6 +109,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         moveSpeed = thisWeapon.GetWeaponStats().moveSpeed; 
+        shieldedMoveSpeed = thisWeapon.GetWeaponStats().shieldedMovement; 
         dashSpeed = thisWeapon.GetWeaponStats().dashSpeed; 
         weakDashNerf = thisWeapon.GetWeaponStats().weakDashNerf; 
         dashDuration = thisWeapon.GetWeaponStats().dashDuration; 
@@ -141,5 +158,14 @@ public class PlayerMovement : MonoBehaviour
         if (thisHealth == null) return;
 
         thisHealth.SetInvincibilityTime(amount, false);
+    }
+
+    public UiInfoStore GetInfo()
+    {
+        UiInfoStore infoStore = new UiInfoStore();
+        infoStore.SetInfo(UiInfoType.Dashes, dashAmount);
+        infoStore.SetInfoLock(UiInfoType.Dashes, true);
+
+        return infoStore;
     }
 }

@@ -9,16 +9,32 @@ using UnityEngine.InputSystem;
 public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseable
 {
     public bool AttackStart { get; set; }
+    public bool IsBlocking { get; set; }
+    public bool CanBlock { get; set; }
 
     public WeaponStats stats;
     public SwingInfo[] swingAnimations; // Array holding information for each swing animation.
-    public SwingInfo blockAnimation;
+    public SwingInfo[] blockAnimations;
 
-    private List<Coroutine> waitingList = new List<Coroutine>();
+    private List<Coroutine> waitingList;
     private int attackNo = -1; // Counter to track the current attack sequence.
-    private bool isBlocking = false;
     private bool startUpIngore = true;
 
+    private void Awake()
+    {
+        waitingList = new List<Coroutine>();
+        CanBlock = true;
+    }
+
+    private void Update()
+    {
+        CheckWaitingListActive();
+
+        if (IsBlocking && !CanBlock)
+        {
+            BreakShield();
+        }
+    }
 
     public void PlayerBlock(InputAction.CallbackContext context)
     {
@@ -27,9 +43,31 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
 
     private void Block()
     {
-        if (waitingList.Count > 0) return;
+        if (waitingList.Count > 0 || !CanBlock)
+        {
+            return;
+        }
 
-        isBlocking = true;
+        switch (IsBlocking)
+        {
+            case true:
+                IsBlocking = false;
+                // Start the delay coroutine before doing the current attack sequence.
+                waitingList.Add(StartCoroutine(DelayAttack(blockAnimations[1], waitingList.Count)));
+                break;
+            case false:
+                IsBlocking = true;
+                // Start the delay coroutine before doing the current attack sequence.
+                waitingList.Add(StartCoroutine(DelayAttack(blockAnimations[0], waitingList.Count)));
+                break;
+        }
+
+    }
+
+    public void BreakShield()
+    {
+        IsBlocking = false;
+        waitingList.Add(StartCoroutine(DelayAttack(blockAnimations[1], waitingList.Count)));
     }
 
     /// <summary>
@@ -54,17 +92,9 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
             return;
         }
 
-        if (isBlocking) return;
+        if (CheckWaitingListActive()) return;
 
-        for (int i = 0; i < waitingList.Count; i++)
-        {
-            if (waitingList[i] != null)
-            {
-                return;
-            }
-        }
-
-        waitingList = new List<Coroutine>();
+        IsBlocking = false;
 
         // Return if no swing animations are defined.
         if (swingAnimations.Length <= 0) return;
@@ -81,6 +111,20 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         waitingList.Add(StartCoroutine(DelayAttack(swingAnimations[attackNo], waitingList.Count)));
     }
 
+    private bool CheckWaitingListActive()
+    {
+        for (int i = 0; i < waitingList.Count; i++)
+        {
+            if (waitingList[i] != null)
+            {
+                return true;
+            }
+        }
+
+        waitingList = new List<Coroutine>();
+        return false;
+    }    
+
     private IEnumerator AttackStartedCheck()
     {
         AttackStart = true;
@@ -89,7 +133,7 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     }
 
     private IEnumerator DelayAttack(SwingInfo swingInfo, int listID)
-    {
+    {     
         float passedTime = 0f;
         float passedPercent = 0f;
         Vector3 startingScale = transform.localScale;
@@ -106,13 +150,12 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
                 startingScale.z + startingScale.z * passedPercent * swingInfo.delayScale);
             
         }
-
         transform.localScale = startingScale;
-
+        
         // Start the rotation animation coroutine for the current attack sequence.
-        waitingList.Add(StartCoroutine(RotateLerp(swingAnimations[attackNo], waitingList.Count)));
+        waitingList.Add(StartCoroutine(RotateLerp(swingInfo, waitingList.Count)));
         // Start the movement animation coroutine simultaneously.
-        waitingList.Add(StartCoroutine(MoveLerp(swingAnimations[attackNo], waitingList.Count)));
+        waitingList.Add(StartCoroutine(MoveLerp(swingInfo, waitingList.Count)));
 
         // Mark the delay as complete by resetting the coroutine reference.
         waitingList[listID] = null;
@@ -155,6 +198,7 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
                 zRotation = Mathf.LerpUnclamped(startRotation, swingInfo.rotation, passedTime);
             }
 
+            zRotation = Mathf.Repeat(zRotation, 360f);
             // If the calculated rotation is invalid (NaN), reset to 0 degrees to avoid errors.
             zRotation = float.IsNaN(zRotation) ? 0f : zRotation;
 
@@ -247,6 +291,8 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     public bool IsAttacking()
     {
         bool isAttacking = false;
+
+        if (IsBlocking) return isAttacking;
 
         // Check whether either of the animation coroutines is active.
         for (int i = 0; i < waitingList.Count; i++)

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class WeaponDamage : MonoBehaviour
 {
     // Reference to the weapon's status interface (used to check if the weapon is attacking).
-    private IWeaponStatusable weaponInfo;
+    private IWeaponStatusable weaponStatus;
 
     // List of enemies that have been hit by the weapon to avoid hitting them multiple times.
     public List<GameObject> hitEnemies;
@@ -19,22 +19,22 @@ public class WeaponDamage : MonoBehaviour
 
         IWeaponStatusable status = GetComponent<IWeaponStatusable>();
         // If a weapon status interface is found, assign it and break the loop.
-        if (status != null) weaponInfo = status;
+        if (status != null) weaponStatus = status;
     }
 
     private void Update()
     {
         // If weaponInfo is set and the weapon is not attacking, clear the list of hit enemies.
-        if (weaponInfo != null)
+        if (weaponStatus != null)
         {
-            if (!weaponInfo.IsAttacking() && hitEnemies.Count > 0)
+            if (!weaponStatus.IsAttacking() && hitEnemies.Count > 0)
             {
                 hitEnemies = new List<GameObject>();  // Reset the list of enemies that have been hit.
             }
 
-            if (weaponInfo.AttackStart)
+            if (weaponStatus.AttackStart)
             {
-                currentPenPower = weaponInfo.GetWeaponStats().penPower;
+                currentPenPower = weaponStatus.GetWeaponStats().penPower;
             }
         }
     }
@@ -47,7 +47,7 @@ public class WeaponDamage : MonoBehaviour
         if (hitEnemies.Contains(collision.gameObject)) return;
 
         // Check if the weapon is currently attacking.
-        if (weaponInfo.IsAttacking())
+        if (weaponStatus.IsAttacking())
         {
             // Try to find a damageable component (i.e., an enemy) in the collided object.
             IDamageable damageable = collision.gameObject.GetComponent<IDamageable>();
@@ -55,11 +55,9 @@ public class WeaponDamage : MonoBehaviour
             // If the collided object is damageable, apply damage and add it to the hit list.
             if (damageable != null)
             {
-                float powerPercent = currentPenPower / weaponInfo.GetWeaponStats().penPower;
+                float powerPercent = currentPenPower / weaponStatus.GetWeaponStats().penPower;
 
-                // TODO: STOP ENEMIES DAMAGING EACH OTHER
-
-                damageable.TakeDamage(weaponInfo.GetWeaponStats().maxDamage * powerPercent);
+                damageable.TakeDamage(weaponStatus.GetWeaponStats().maxDamage * powerPercent, gameObject);
                 hitEnemies.Add(collision.gameObject);  // Add the enemy to the list to prevent multiple hits.
 
                 currentPenPower -= 1f;
