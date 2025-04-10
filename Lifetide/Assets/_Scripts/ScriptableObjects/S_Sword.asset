@@ -15,3 +15,11 @@ MonoBehaviour:
   weaponName: Sword
   maxDamage: 10
   penPower: 3
+  blocking: 0
+  moveSpeed: 15
+  dashSpeed: 40
+  weakDashNerf: 0.3
+  dashDuration: 0.1
+  dashCooldown: 2.5
+  maxDashAmount: 3
+  maxWeakDashAmount: 4

@@ -4,8 +4,6 @@ using System.Collections.Generic;
 [RequireComponent(typeof(BoxCollider2D))]  
 public class WeaponDamage : MonoBehaviour
 {
-    public WeaponStats stats;
-
     // Reference to the weapon's status interface (used to check if the weapon is attacking).
     private IWeaponStatusable weaponInfo;
 
@@ -19,7 +17,7 @@ public class WeaponDamage : MonoBehaviour
         // Initialise the list of enemies that the weapon has already hit.
         hitEnemies = new List<GameObject>();
 
-        IWeaponStatusable status = gameObject.GetComponent<IWeaponStatusable>();
+        IWeaponStatusable status = GetComponent<IWeaponStatusable>();
         // If a weapon status interface is found, assign it and break the loop.
         if (status != null) weaponInfo = status;
     }
@@ -36,7 +34,7 @@ public class WeaponDamage : MonoBehaviour
 
             if (weaponInfo.AttackStart)
             {
-                currentPenPower = stats.penPower;
+                currentPenPower = weaponInfo.GetWeaponStats().penPower;
             }
         }
     }
@@ -57,11 +55,11 @@ public class WeaponDamage : MonoBehaviour
             // If the collided object is damageable, apply damage and add it to the hit list.
             if (damageable != null)
             {
-                float powerPercent = currentPenPower / stats.penPower;
+                float powerPercent = currentPenPower / weaponInfo.GetWeaponStats().penPower;
 
                 // TODO: STOP ENEMIES DAMAGING EACH OTHER
 
-                damageable.TakeDamage(stats.maxDamage * powerPercent);
+                damageable.TakeDamage(weaponInfo.GetWeaponStats().maxDamage * powerPercent);
                 hitEnemies.Add(collision.gameObject);  // Add the enemy to the list to prevent multiple hits.
 
                 currentPenPower -= 1f;

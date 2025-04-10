@@ -27,7 +27,7 @@ public class UIUpdater : MonoBehaviour
             UiInfoStore thisInfoStore = uiReadings[i].GetInfo();
             if (thisInfoStore.CheckInfoLock(UiInfoType.Health))
             {
-                thisInfoStore.TryGetInfo(UiInfoType.Health, out float health)
+                thisInfoStore.TryGetInfo(UiInfoType.Health, out float health);
                 healthTXT.text = "Health: " + health;
             }
         }

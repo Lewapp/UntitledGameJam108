@@ -2,22 +2,35 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseable
 {
-    // Array holding information for each swing animation.
-    public SwingInfo[] swingAnimations;
+    public bool AttackStart { get; set; }
 
-    public List<Coroutine> waitingList = new List<Coroutine>();
+    public WeaponStats stats;
+    public SwingInfo[] swingAnimations; // Array holding information for each swing animation.
+    public SwingInfo blockAnimation;
 
-    // Counter to track the current attack sequence.
-    public int attackNo = -1;
-
+    private List<Coroutine> waitingList = new List<Coroutine>();
+    private int attackNo = -1; // Counter to track the current attack sequence.
+    private bool isBlocking = false;
     private bool startUpIngore = true;
 
-    public bool AttackStart { get; set; }
+
+    public void PlayerBlock(InputAction.CallbackContext context)
+    {
+        Block();
+    }
+
+    private void Block()
+    {
+        if (waitingList.Count > 0) return;
+
+        isBlocking = true;
+    }
 
     /// <summary>
     /// Initiates an attack based on input context, starting the rotation animation if not already attacking.
@@ -33,13 +46,15 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         Attack();
     }
 
-    public void Attack()
+    private void Attack()
     {
         if (startUpIngore)
         {
             startUpIngore = false;
             return;
         }
+
+        if (isBlocking) return;
 
         for (int i = 0; i < waitingList.Count; i++)
         {
@@ -243,6 +258,11 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
             }
         }
         return isAttacking;
+    }
+
+    public WeaponStats GetWeaponStats()
+    {
+        return stats;
     }
 
     /// <summary>

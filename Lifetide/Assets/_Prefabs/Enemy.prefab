@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca6f7b112a4d85f4da32523ecfd562e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stats: {fileID: 11400000, guid: f50cb5d3fa68c7f4e8e47667f94e5ca1, type: 2}
   swingAnimations:
   - duration: 0.5
     location: {x: 0.26, y: 0.51, z: 0}
@@ -76,7 +77,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b978fcb6b899c84c9fb59f98ef55703, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stats: {fileID: 11400000, guid: f50cb5d3fa68c7f4e8e47667f94e5ca1, type: 2}
   hitEnemies: []
 --- !u!61 &6777982901450608903
 BoxCollider2D:
