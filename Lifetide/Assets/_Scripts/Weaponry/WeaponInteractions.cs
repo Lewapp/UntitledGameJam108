@@ -340,7 +340,6 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         return longPathAngle / shortPathAngle;
     }
 
-
     public WeaponStats GetWeaponStats()
     {
         return stats;
