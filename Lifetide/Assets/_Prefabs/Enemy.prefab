@@ -206,8 +206,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 4.43, y: 1.45, z: 0.08681281}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2399591691944456244}
   - {fileID: 7839398639487456736}
@@ -325,7 +325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f74f3f4500237345a9ba9c6b9d6b9a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterStats: {fileID: 11400000, guid: 8a9698c5cac6ebc4b976dd8bccc4daf1, type: 2}
+  characterType: 1
   currentHealth: 0
 --- !u!114 &5088035741098551034
 MonoBehaviour:
@@ -354,6 +354,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a48388f8b1a6d34ea3ace5b9f8c41d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyType: 0
   weapons:
   - {fileID: 4610612032605115772}
   moveSpeed: 2.5

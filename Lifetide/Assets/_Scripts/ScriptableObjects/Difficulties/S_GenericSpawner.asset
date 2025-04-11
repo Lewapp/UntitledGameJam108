@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edc9f40fae48b574ab4818d1425354ab, type: 3}
+  m_Name: S_GenericSpawner
+  m_EditorClassIdentifier: 
+  locked: 0
+  stats:
+  - difficulty: 0
+    selfDestructAmount: 0
+    selfLockAmount: 0
+    spawnObjects:
+    - spawnee: {fileID: 9200437086645507091, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
+      spawnInfluence: 0
+    spawnTimeRange: {x: 3, y: 24}
+    spawnAmountRange: {x: 1, y: 2}
+    timePerMultiSpawn: 2
+    maximumSpawns: 12
+    spawnsCheckThreshold: 5
+  - difficulty: 1
+    selfDestructAmount: 0
+    selfLockAmount: 0
+    spawnObjects:
+    - spawnee: {fileID: 9200437086645507091, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
+      spawnInfluence: 0
+    spawnTimeRange: {x: 2, y: 22}
+    spawnAmountRange: {x: 1, y: 3}
+    timePerMultiSpawn: 1
+    maximumSpawns: 20
+    spawnsCheckThreshold: 5
+  - difficulty: 2
+    selfDestructAmount: 0
+    selfLockAmount: 0
+    spawnObjects:
+    - spawnee: {fileID: 9200437086645507091, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
+      spawnInfluence: 0
+    spawnTimeRange: {x: 1.5, y: 18}
+    spawnAmountRange: {x: 1, y: 4}
+    timePerMultiSpawn: 0.5
+    maximumSpawns: 30
+    spawnsCheckThreshold: 5

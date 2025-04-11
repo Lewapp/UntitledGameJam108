@@ -4,54 +4,63 @@ using System;
 using System.Linq;
 using System.Collections;
 
-public class GenericSpawner : MonoBehaviour
+public class Spawner : MonoBehaviour, IDirectable
 {
     #region Properties and References
 
-    public bool locked;
-    public SpawnObject[] spawnObjects;
-    public Vector2 spawnTimeRange;
-    public Vector2Int spawnAmountRange;
-    public float timePerMultiSpawn;
-    public int maximumSpawns;
-    public int spawnsCheckThreshold;
+    public bool difficultyApplied { get; set; }
+
+    public bool personalLock;
+    public SpawnerType spawnerType;
+    public SpawnerInfo spawnerInfo;
 
     private List<GameObject> spawnedObjects = new List<GameObject>();
     private int spawnsSinceLastCheck = 0;
     private float timeSinceLastSpawn = 0f;
     private float multiSpawnTime = 0f;
     private float nextRandomTime;
+    private int totalSpawns;
+    private int totalSpawns_Reset;
+    private int difficultyIndex;
 
     [SerializeField]
-    private int totalSpawns;
+    private int totalActiveSpawns;
 
     #endregion
 
     private void Awake()
     {
         SetRandomSpawnTime();
+        SpawnDirector.Register(this, gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        SpawnDirector.UnRegister(this, gameObject);
     }
 
     private void Update()
     {
-        totalSpawns = spawnedObjects.Count;
+        if (spawnerInfo.locked || personalLock) return;
 
-        if (spawnsSinceLastCheck >= spawnsCheckThreshold)
+        totalActiveSpawns = spawnedObjects.Count;
+        SelfLockCheck();
+        SelfDestructCheck();
+
+        if (spawnsSinceLastCheck >= spawnerInfo.stats[difficultyIndex].spawnsCheckThreshold)
         {
             CheckSpawnsStatus();
             spawnsSinceLastCheck = 0;
         }
-
-        if (locked) return;
 
         timeSinceLastSpawn += Time.deltaTime;
 
         if (timeSinceLastSpawn >= nextRandomTime)
         {
             timeSinceLastSpawn = 0f;
-            if (spawnedObjects.Count < maximumSpawns)
+            if (spawnedObjects.Count < spawnerInfo.stats[difficultyIndex].maximumSpawns)
             {
-                StartCoroutine(Spawn(UnityEngine.Random.Range(spawnAmountRange.x, spawnAmountRange.y)));
+                StartCoroutine(Spawn(UnityEngine.Random.Range(spawnerInfo.stats[difficultyIndex].spawnAmountRange.x, spawnerInfo.stats[difficultyIndex].spawnAmountRange.y)));
             }
             else
             {
@@ -60,21 +69,67 @@ public class GenericSpawner : MonoBehaviour
         }
     }
 
+    private void SelfDestructCheck()
+    {
+        if (totalSpawns >= spawnerInfo.stats[difficultyIndex].selfDestructAmount && spawnerInfo.stats[difficultyIndex].selfDestructAmount > 0)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void SelfLockCheck()
+    {
+        if (totalSpawns_Reset >= spawnerInfo.stats[difficultyIndex].selfLockAmount && spawnerInfo.stats[difficultyIndex].selfLockAmount > 0)
+        {
+            personalLock = true;
+            totalSpawns_Reset = 0;
+        }
+    }
+
+    public void SetDifficulty(DifficultyInfo spawnInfo)
+    {
+        if (!spawnInfo) return;
+
+        switch (spawnerType)
+        {
+            case SpawnerType.Generic:
+                spawnerInfo = spawnInfo.genericSpawnerInfo;
+                break;
+            case SpawnerType.Special:
+                spawnerInfo = spawnInfo.specialSpawnerInfo;
+                break;
+            case SpawnerType.Boss:
+                spawnerInfo = spawnInfo.bossSpawnerInfo;
+                break;
+        }
+
+        for (int i = 0; i < spawnerInfo.stats.Length; i++)
+        {
+            if (spawnerInfo.stats[i].difficulty == spawnInfo.difficultyType)
+            {
+                difficultyIndex = i;
+                break;
+            }
+        }
+
+        difficultyApplied = true;
+    }
+
     private IEnumerator Spawn(int amount)
     {
-        if (spawnObjects.Length > 0)
+        if (spawnerInfo.stats[difficultyIndex].spawnObjects.Length > 0)
         {
             GameObject chosenSpawnObject = null;
 
             float total = 0f;
-            foreach (SpawnObject so in spawnObjects)
+            foreach (SpawnerInfo.SpawnObject so in spawnerInfo.stats[difficultyIndex].spawnObjects)
             {
                 total += so.spawnInfluence;
             }
 
             float chosenInfluence = UnityEngine.Random.Range(0, total);
             total = 0f;
-            foreach (SpawnObject so in spawnObjects)
+            foreach (SpawnerInfo.SpawnObject so in spawnerInfo.stats[difficultyIndex].spawnObjects)
             {
                 if (total <= chosenInfluence)
                 {
@@ -87,6 +142,8 @@ public class GenericSpawner : MonoBehaviour
             {
                 for (int i = 0; i < amount; i++)
                 {
+                    totalSpawns++;
+                    totalSpawns_Reset++;
                     spawnedObjects.Add(Instantiate(chosenSpawnObject, transform.position, Quaternion.identity));
                     yield return new WaitForSeconds(multiSpawnTime);
                 }
@@ -103,13 +160,13 @@ public class GenericSpawner : MonoBehaviour
 
     private void SetRandomSpawnTime()
     {
-        nextRandomTime = UnityEngine.Random.Range(spawnTimeRange.x, spawnTimeRange.y);
+        nextRandomTime = UnityEngine.Random.Range(spawnerInfo.stats[difficultyIndex].spawnTimeRange.x, spawnerInfo.stats[difficultyIndex].spawnTimeRange.y);
     }
 
-    [Serializable]
-    public class SpawnObject
-    {
-        public GameObject spawnee;
-        public float spawnInfluence;
+    public enum SpawnerType
+    { 
+        Generic,
+        Special,
+        Boss,
     }
 }

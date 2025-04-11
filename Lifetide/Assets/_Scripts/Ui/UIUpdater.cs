@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 using System.Collections.Generic;
-using static UiInfoStore;
+using static InfoStore;
 
 public class UIUpdater : MonoBehaviour
 {
@@ -36,26 +36,26 @@ public class UIUpdater : MonoBehaviour
         for (int i = 0; i < uiReadings.Count; i++)
         {
             // Retrieve the information store for this UI-readable component
-            UiInfoStore thisInfoStore = uiReadings[i].GetInfo();
+            InfoStore thisInfoStore = uiReadings[i].GetInfo();
 
             // Check and update health display
-            if (thisInfoStore.CheckInfoLock(UiInfoType.Health))
+            if (thisInfoStore.CheckInfoLock(InfoType.Health))
             {
-                thisInfoStore.TryGetInfo(UiInfoType.Health, out float health);
+                thisInfoStore.TryGetInfo(InfoType.Health, out float health);
                 healthTXT.text = "Health: " + health;
             }
 
             // Check and update shield display
-            if (thisInfoStore.CheckInfoLock(UiInfoType.Shield))
+            if (thisInfoStore.CheckInfoLock(InfoType.Shield))
             {
-                thisInfoStore.TryGetInfo(UiInfoType.Shield, out int shield);
+                thisInfoStore.TryGetInfo(InfoType.Shield, out int shield);
                 shieldTXT.text = "Shield: " + shield;
             }
 
             // Check and update dashes display
-            if (thisInfoStore.CheckInfoLock(UiInfoType.Dashes))
+            if (thisInfoStore.CheckInfoLock(InfoType.Dashes))
             {
-                thisInfoStore.TryGetInfo(UiInfoType.Dashes, out float dashes);
+                thisInfoStore.TryGetInfo(InfoType.Dashes, out float dashes);
                 dashesTXT.text = "Dashes: " + dashes;
             }
         }

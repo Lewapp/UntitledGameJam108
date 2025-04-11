@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using static UiInfoStore;
+using static InfoStore;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovement : MonoBehaviour, IUiReadable
@@ -189,15 +189,15 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
     /// Returns dash-related UI information for display purposes.
     /// </summary>
     /// <returns>A UiInfoStore with current dash count info.</returns>
-    public UiInfoStore GetInfo()
+    public InfoStore GetInfo()
     {
-        UiInfoStore infoStore = new UiInfoStore();
+        InfoStore infoStore = new InfoStore();
 
         // Set current dash count in UI
-        infoStore.SetInfo(UiInfoType.Dashes, dashAmount);
+        infoStore.SetInfo(InfoType.Dashes, dashAmount);
 
         // Mark as unlocked to allow it to be read
-        infoStore.SetInfoLock(UiInfoType.Dashes, true);
+        infoStore.SetInfoLock(InfoType.Dashes, true);
 
         return infoStore;
     }

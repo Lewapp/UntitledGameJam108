@@ -1,23 +1,32 @@
 using UnityEngine;
-using static UiInfoStore;
+using static InfoStore;
 
-public class Health : MonoBehaviour, IDamageable, IUiReadable
+public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
 {
     public int shieldAmount { get; set; }    // Current number of shield points available for blocking
+    public bool difficultyApplied { get; set; }    // States whether difficulty has already been applied or not
 
-    public CharacterStats characterStats;    // Reference to character's base stats
+    public CharacterStats.characterTypes characterType;    // Reference to character's base stats
     public float currentHealth;              // Current health value of the character
 
     private IWeaponReadable weaponInfo;      // Cached weapon information 
     private WeaponStats weaponStats;         // Cached weapon stats
     private float iTime = 0f;                // Invincibility timer (prevents repeated damage in short time)
     private float shieldTime = 0f;           // Timer tracking how long since the last shield recharge
+    private float maxHealth;
+
+    private void Awake()
+    {
+        SpawnDirector.Register(this, gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        SpawnDirector.UnRegister(this, gameObject);
+    }
 
     private void Start()
     {
-        // Set current health to max at start
-        currentHealth = characterStats.maxHealth;
-
         // Get weapon info and weapon stats if available
         weaponInfo = GetComponent<IWeaponReadable>();
         if (weaponInfo?.weaponStatus != null)
@@ -25,6 +34,8 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable
 
         // If weapon has shielding capability, initialise shield amount
         if (weaponStats) shieldAmount = weaponStats.blocking;
+
+        currentHealth = maxHealth;
     }
 
     private void Update()
@@ -178,15 +189,40 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable
     /// Returns current health and shield values for the UI system.
     /// Unlocks both values to ensure UI can read them
     /// </summary>
-    public UiInfoStore GetInfo()
+    public InfoStore GetInfo()
     {
-        UiInfoStore infoStore = new UiInfoStore();
-        infoStore.SetInfo(UiInfoType.Health, currentHealth);
-        infoStore.SetInfoLock(UiInfoType.Health, true);
+        InfoStore infoStore = new InfoStore();
+        infoStore.SetInfo(InfoType.Health, currentHealth);
+        infoStore.SetInfoLock(InfoType.Health, true);
 
-        infoStore.SetInfo(UiInfoType.Shield, shieldAmount);
-        infoStore.SetInfoLock(UiInfoType.Shield, true);
+        infoStore.SetInfo(InfoType.Shield, shieldAmount);
+        infoStore.SetInfoLock(InfoType.Shield, true);
 
         return infoStore;
+    }
+
+    public void SetDifficulty(DifficultyInfo difficultyInfo)
+    {
+        if (!difficultyInfo)
+            return;
+
+        for (int i = 0; i < difficultyInfo.characterStats.Count; i++)
+        {
+            if (difficultyInfo.characterStats[i].characterType != characterType)
+            {
+                continue;
+            }
+
+            foreach (CharacterStats.CharacterDifficultyStats cds in difficultyInfo.characterStats[i].stats)
+            {
+                if (cds.difficulty == difficultyInfo.difficultyType)
+                {
+                    maxHealth = cds.maxHealth;
+                    currentHealth = maxHealth;
+                }
+            }
+        }
+
+        difficultyApplied = true;
     }
 }

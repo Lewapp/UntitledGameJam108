@@ -11,12 +11,14 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     public bool AttackStart { get; set; }
     public bool IsBlocking { get; set; }
     public bool CanBlock { get; set; }
+    public float AttackSpeedMultiplier { get; set; }
+    public float DelayMultiplier { get; set; }
 
     public WeaponStats stats;               // The stats of the weapon being used
     public SwingInfo[] swingAnimations;     // Swing animations to cycle through when attacking.
     public SwingInfo[] blockAnimations;     // Block animations for entering and exiting block state.
 
-    private List<Coroutine> waitingList;    // Tracks the status of started coroutines
+    private List<AnimationTask> waitingList;    // Tracks the status of started coroutines
     private int attackNo = -1;              // Tracks the current index in the attack animation sequence.
     private bool startUpIgnore = true;      // Ignores the first startup input (useful for input buffering quirks).
 
@@ -26,7 +28,7 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
 
     private void Awake()
     {
-        waitingList = new List<Coroutine>();
+        waitingList = new List<AnimationTask>();
         CanBlock = true;
     }
 
@@ -86,12 +88,18 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         if (IsBlocking)
         {
             IsBlocking = false;
-            waitingList.Add(StartCoroutine(DelayAttack(blockAnimations[1], waitingList.Count)));
+            AnimationTask task = new AnimationTask();
+            task.activeCoroutine = StartCoroutine(DelayAttack(blockAnimations[1], waitingList.Count));
+            task.attackAnimation = false;
+            waitingList.Add(task);
         }
         else
         {
             IsBlocking = true;
-            waitingList.Add(StartCoroutine(DelayAttack(blockAnimations[0], waitingList.Count)));
+            AnimationTask task = new AnimationTask();
+            task.activeCoroutine = StartCoroutine(DelayAttack(blockAnimations[0], waitingList.Count));
+            task.attackAnimation = false;
+            waitingList.Add(task);
         }
     }
 
@@ -101,7 +109,10 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     public void BreakShield()
     {
         IsBlocking = false;
-        waitingList.Add(StartCoroutine(DelayAttack(blockAnimations[1], waitingList.Count)));
+        AnimationTask task = new AnimationTask();
+        task.activeCoroutine = StartCoroutine(DelayAttack(blockAnimations[1], waitingList.Count));
+        task.attackAnimation = false;
+        waitingList.Add(task);
     }
 
     #endregion
@@ -127,16 +138,19 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         // Return if no swing animations are defined.
         if (swingAnimations.Length <= 0) return;
 
-        //  Claim that the attack has just started
-        StartCoroutine(AttackStartedCheck());
-
         // Increment the attack number to select the next animation.
         attackNo++;
         // Loop back to the first swing animation if the end of the array is reached.
         attackNo = (int)Mathf.Repeat(attackNo, swingAnimations.Length);
 
+        //  Claim that the attack has just started
+        StartCoroutine(AttackStartedCheck());
+
         // Start the delay coroutine before doing the current attack sequence.
-        waitingList.Add(StartCoroutine(DelayAttack(swingAnimations[attackNo], waitingList.Count)));
+        AnimationTask task = new AnimationTask();
+        task.activeCoroutine = StartCoroutine(DelayAttack(swingAnimations[attackNo], waitingList.Count));
+        task.attackAnimation = false;
+        waitingList.Add(task);
     }
 
     /// <summary>
@@ -159,10 +173,12 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         if (IsBlocking) return false;
 
         // Check if any coroutine is still running.
-        foreach (var coroutine in waitingList)
+        foreach (AnimationTask task in waitingList)
         {
-            if (coroutine != null)
+            if (task?.activeCoroutine != null && task.attackAnimation)
+            {
                 return true;
+            }
         }
 
         // No active animations found.
@@ -186,8 +202,10 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         // Store the initial scale of the object to revert after the delay.
         Vector3 startingScale = transform.localScale;
 
+        float delay = swingInfo.delay - (swingInfo.delay * DelayMultiplier);
+
         // Perform the delay, increasing the scale slightly over time to add visual anticipation.
-        while (passedTime < swingInfo.delay)
+        while (passedTime < delay)
         {
             yield return null; // Wait for the next frame.
 
@@ -207,10 +225,16 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
 
         // After the delay ends, start the actual swing motion:
         // Add rotation animation coroutine.
-        waitingList.Add(StartCoroutine(RotateLerp(swingInfo, waitingList.Count)));
+        AnimationTask rotateTask = new AnimationTask();
+        rotateTask.activeCoroutine = StartCoroutine(RotateLerp(swingInfo, waitingList.Count));
+        rotateTask.attackAnimation = true;
+        waitingList.Add(rotateTask);
 
         // Add movement animation coroutine.
-        waitingList.Add(StartCoroutine(MoveLerp(swingInfo, waitingList.Count)));
+        AnimationTask moveTask = new AnimationTask();
+        moveTask.activeCoroutine = StartCoroutine(MoveLerp(swingInfo, waitingList.Count));
+        moveTask.attackAnimation = true;
+        waitingList.Add(moveTask);
 
         // Mark this delay coroutine as completed in the waiting list.
         waitingList[listID] = null;
@@ -233,11 +257,14 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         // Get a multiplier for long-way rotation if applicable.
         float zMultiplier = GetLongWayMultiplier(startRotation, swingInfo.rotation);
         float zRotation = 0f;
+        float timePos = 0f;
 
         while (true)
         {
+            timePos = Time.deltaTime / swingInfo.duration;
+
             // Increase the interpolation time factor based on duration.
-            passedTime += Time.deltaTime / swingInfo.duration;
+            passedTime += timePos + (timePos * AttackSpeedMultiplier);
 
             // Choose long-way or short-way interpolation.
             zRotation = swingInfo.longWay
@@ -275,11 +302,14 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         // Store the starting local position of the weapon.
         Vector3 startPosition = transform.localPosition;
         float passedTime = 0f;
+        float timePos = 0f;
 
         while (true)
         {
+            timePos = Time.deltaTime / swingInfo.duration;
+
             // Incrementally progress based on duration.
-            passedTime += Time.deltaTime / swingInfo.duration;
+            passedTime += timePos + (timePos * AttackSpeedMultiplier);
 
             // Linearly interpolate from the start to the target position.
             transform.localPosition = Vector3.Lerp(startPosition, swingInfo.location, passedTime);
@@ -309,11 +339,11 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     {
         for (int i = 0; i < waitingList.Count; i++)
         {
-            if (waitingList[i] != null)
+            if (waitingList[i]?.activeCoroutine != null)
                 return true;
         }
 
-        waitingList = new List<Coroutine>();
+        waitingList = new List<AnimationTask>();
         return false;
     }
 
@@ -345,6 +375,16 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         return stats;
     }
 
+    public bool IsInAnimation()
+    {
+        if (waitingList.Count > 0)
+        {
+            return true; 
+        }
+
+        return false;
+    }
+
     #endregion
 
     #region Subclasses
@@ -362,6 +402,12 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         public float delayScale;     // How much the weapon scales during delay.
         public bool longWay;         // Use long rotation path (e.g., clockwise 270° instead of counter-clockwise 90°).
         public bool continues;       // If true, auto-continue to the next attack in sequence.
+    }
+
+    public class AnimationTask
+    {
+        public Coroutine activeCoroutine;
+        public bool attackAnimation;
     }
 
     #endregion

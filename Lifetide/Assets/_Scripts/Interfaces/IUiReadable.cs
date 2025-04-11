@@ -2,7 +2,7 @@ using UnityEngine;
 
 public interface IUiReadable
 {
-    public UiInfoStore GetInfo();
+    public InfoStore GetInfo();
 }
 
 

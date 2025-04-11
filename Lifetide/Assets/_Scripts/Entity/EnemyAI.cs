@@ -4,8 +4,11 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class EnemyAI : MonoBehaviour
+public class EnemyAI : MonoBehaviour, IDirectable
 {
+    public bool difficultyApplied { get; set; }    // States whether difficulty has already been applied or not
+
+    public CharacterStats.characterTypes enemyType;
     public GameObject[] weapons;            // Array of weapons the enemy can use
     public float moveSpeed = 1.0f;          // Movement speed of the enemy when approaching the player
 
@@ -17,6 +20,16 @@ public class EnemyAI : MonoBehaviour
 
     // Quick reference to the Rigidbody2D component
     private Rigidbody2D rb { get => GetComponent<Rigidbody2D>(); }
+
+    private void Awake()
+    {
+        SpawnDirector.Register(this, gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        SpawnDirector.UnRegister(this, gameObject);
+    }
 
     private void Start()
     {
@@ -47,7 +60,7 @@ public class EnemyAI : MonoBehaviour
                 if (weaponI == null) continue;
 
                 // Only move if the weapon is not mid-attack
-                if (!weaponI.IsAttacking())
+                if (!weaponI.IsInAnimation())
                 {
                     rb.linearVelocity = new Vector2(transform.up.x * moveSpeed, transform.up.y * moveSpeed);
                 }
@@ -55,7 +68,8 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    // Coroutine that handles the delay between enemy attacks
+
+
     private IEnumerator AttackDelay(float amount)
     {
         attackActive = true;
@@ -88,5 +102,33 @@ public class EnemyAI : MonoBehaviour
         {
             playerInRange = false;
         }
+    }
+
+    public void SetDifficulty(DifficultyInfo difficultyInfo)
+    {
+        if (!difficultyInfo) return;
+
+        for (int i = 0; i < difficultyInfo.characterStats.Count; i++)
+        {
+            if (difficultyInfo.characterStats[i].characterType != enemyType)
+            {
+                continue;
+            }
+
+            foreach (CharacterStats.CharacterDifficultyStats cds in difficultyInfo.characterStats[i].stats)
+            {
+                if (cds.difficulty == difficultyInfo.difficultyType)
+                {
+                    moveSpeed = cds.moveSpeed;
+                    for (int w = 0; w < weaponInfo.Count; w++)
+                    {
+                        weaponInfo[w].AttackSpeedMultiplier = cds.attackSpeedMp;
+                        weaponInfo[w].DelayMultiplier = cds.delayMp;
+                    }
+                }
+            }   
+        }
+
+        difficultyApplied = true;
     }
 }

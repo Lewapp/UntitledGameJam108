@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: Sword
   maxDamage: 10
-  penPower: 3
+  penPower: 6
   blocking: 6
   blockRange: 0.4
   shieldRechargeRate: {x: 2.5, y: 1.5}
   moveSpeed: 15
+  shieldedMovement: 7
   dashSpeed: 40
   weakDashNerf: 0.3
   dashDuration: 0.1
