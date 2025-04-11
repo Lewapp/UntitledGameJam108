@@ -11,6 +11,7 @@ public class EnemyAI : MonoBehaviour, IDirectable
     public CharacterStats.characterTypes enemyType;
     public GameObject[] weapons;            // Array of weapons the enemy can use
     public float moveSpeed = 1.0f;          // Movement speed of the enemy when approaching the player
+    public float attackMovement = 0f;          // Movement speed of the enemy when approaching the player whilst attacking
 
     // Internal lists to store weapon behaviours and status info
     private List<IEnemyUseable> weaponUses = new List<IEnemyUseable>();
@@ -63,6 +64,10 @@ public class EnemyAI : MonoBehaviour, IDirectable
                 if (!weaponI.IsInAnimation())
                 {
                     rb.linearVelocity = new Vector2(transform.up.x * moveSpeed, transform.up.y * moveSpeed);
+                }
+                else
+                {
+                    rb.linearVelocity = new Vector2(transform.up.x * attackMovement, transform.up.y * attackMovement);
                 }
             }
         }
@@ -120,10 +125,11 @@ public class EnemyAI : MonoBehaviour, IDirectable
                 if (cds.difficulty == difficultyInfo.difficultyType)
                 {
                     moveSpeed = cds.moveSpeed;
+                    attackMovement = cds.attackMoveSpeed;
                     for (int w = 0; w < weaponInfo.Count; w++)
                     {
                         weaponInfo[w].AttackSpeedMultiplier = cds.attackSpeedMp;
-                        weaponInfo[w].DelayMultiplier = cds.delayMp;
+                        weaponInfo[w].DelayMultiplier = cds.delayMp;          
                     }
                 }
             }   

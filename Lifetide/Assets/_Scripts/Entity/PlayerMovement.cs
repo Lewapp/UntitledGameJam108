@@ -6,8 +6,12 @@ using static InfoStore;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovement : MonoBehaviour, IUiReadable
 {
+    // TODO: Make weapons be a multiplier instead of a set stat for player so that player's CharacterStats are considered base stats
+    public CharacterStats characterStats;
+
     [Header("Movement Settings")]
-    public float moveSpeed;              // Normal movement speed multiplier
+    public float moveSpeed;              // Normal movement speed 
+    public float attackMovement;         // Attacking movement speed 
     public float shieldedMoveSpeed;      // Movement speed while blocking
     public float dashSpeed;              // Dash speed multiplier
     public float weakDashNerf;           // Speed reduction for weak dashes (after main dashes run out)
@@ -101,6 +105,15 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
         else
         {
             rb.linearVelocity = moveDirection * moveSpeed;
+            // Only move if the weapon is not mid-attack
+            if (!thisWeapon.IsInAnimation())
+            {
+                rb.linearVelocity = moveDirection * moveSpeed;
+            }
+            else
+            {
+                rb.linearVelocity = moveDirection * attackMovement;
+            }
         }
     }
 
@@ -113,6 +126,7 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
         {
             Debug.LogWarning("Using default movement stats");
             moveSpeed = 15f;
+            attackMovement = 15f;
             shieldedMoveSpeed = 7f;
             dashSpeed = 40f;
             weakDashNerf = 0.3f;

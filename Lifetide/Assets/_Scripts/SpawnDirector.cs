@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -11,11 +12,12 @@ public class SpawnDirector : MonoBehaviour
     public static List<GameObject> spawnedWeaponsMemory = new List<GameObject>();
 
     public GameObject player;
+    public Vector2 specialSpawnRate;
 
     private IUiReadable difficultyManager;
     private DifficultyInfo currentDifficulty;
     private int spawners = 0;
-    public int enemies = 0;
+    private float nextSpecialTime;
 
     private void Awake()
     {
@@ -49,8 +51,14 @@ public class SpawnDirector : MonoBehaviour
         }
 
         spawnedEnemiesMemory = CompareLists(spawnedEnemies, spawnedEnemiesMemory, out int eCount);
-        enemies = eCount;
         spawnedWeaponsMemory = CompareLists(spawnedWeapons, spawnedWeaponsMemory, out int wCount);
+
+        nextSpecialTime -= Time.deltaTime;
+        if (nextSpecialTime <= 0)
+        {
+            nextSpecialTime = Random.Range(specialSpawnRate.x, specialSpawnRate.y);
+            AttemptSpecialSpawn();
+        }
     }
 
     private void LockNonGenericSpawners()
@@ -62,8 +70,58 @@ public class SpawnDirector : MonoBehaviour
                 continue;
 
             if (spawnerable.GetSpawnType() != Spawner.SpawnerType.Generic)
-            {
                 spawnerable.personalLock = true;
+        }
+    }
+
+    private void AttemptSpecialSpawn()
+    {
+        bool success = true;
+
+        List<ISpawnerable> specialSpawners = new List<ISpawnerable>();
+        foreach (GameObject go in spawnDirectables)
+        {
+            ISpawnerable spawnerable = go.GetComponent<ISpawnerable>();
+            if (spawnerable == null)
+                continue;
+
+            if (spawnerable.GetSpawnType() == Spawner.SpawnerType.Special)
+                specialSpawners.Add(spawnerable);
+        }
+
+        int index = 0;
+        for (int i = 0; i < currentDifficulty.specialSpawnerInfo.stats.Length; i++)
+        {
+            if (currentDifficulty.specialSpawnerInfo.stats[i].difficulty == currentDifficulty.difficultyType)
+            {
+                index = i;
+                break;
+            }
+        }
+
+        currentDifficulty.specialSpawnerInfo.locked = false;
+        List<ISpawnerable> usedSpawners = new List<ISpawnerable>();
+        float chance = 0f;
+        while (success)
+        {
+            success = false;
+            if (currentDifficulty.specialSpawnerInfo.stats[index].spawnChance <= 0)
+                break;
+
+            chance = Random.Range(0f, 1f);
+            foreach (ISpawnerable spawner in specialSpawners)
+            {
+                if (usedSpawners.Contains(spawner))
+                    continue;
+
+                if (chance <= currentDifficulty.specialSpawnerInfo.stats[index].spawnChance)
+                {
+                    success = true;
+                    usedSpawners.Add(spawner);
+                    spawner.personalLock = false; // Allows special spawn
+
+                    break;
+                }
             }
         }
     }

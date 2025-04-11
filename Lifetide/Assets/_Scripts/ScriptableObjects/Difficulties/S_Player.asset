@@ -18,6 +18,7 @@ MonoBehaviour:
     maxHealth: 150
     mass: 1
     moveSpeed: 3
+    attackMoveSpeed: 1
     damageMp: 0.2
     penetrationMp: 0
     delayMp: 0.2
@@ -26,6 +27,7 @@ MonoBehaviour:
     maxHealth: 100
     mass: 1
     moveSpeed: 2.5
+    attackMoveSpeed: 1
     damageMp: 0
     penetrationMp: 0
     delayMp: 0
@@ -34,6 +36,7 @@ MonoBehaviour:
     maxHealth: 80
     mass: 1
     moveSpeed: 2.5
+    attackMoveSpeed: 1
     damageMp: -0.1
     penetrationMp: -0.2
     delayMp: -0.1

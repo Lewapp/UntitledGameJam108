@@ -41,11 +41,11 @@ public class Spawner : MonoBehaviour, IDirectable, ISpawnerable
 
     private void Update()
     {
-        if (spawnerInfo.locked || personalLock) return;
-
         totalActiveSpawns = spawnedObjects.Count;
         SelfLockCheck();
         SelfDestructCheck();
+
+        if (spawnerInfo.locked || personalLock) return;
 
         if (spawnsSinceLastCheck >= spawnerInfo.stats[difficultyIndex].spawnsCheckThreshold)
         {

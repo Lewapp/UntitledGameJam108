@@ -26,6 +26,7 @@ public class CharacterStats : ScriptableObject
         public float maxHealth; // Max health of character
         public float mass; // Mass of Character
         public float moveSpeed;
+        public float attackMoveSpeed;
         public float damageMp;
         public float penetrationMp;
         public float delayMp;
