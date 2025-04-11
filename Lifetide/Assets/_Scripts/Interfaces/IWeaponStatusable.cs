@@ -2,6 +2,7 @@ using UnityEngine;
 
 public interface IWeaponStatusable
 {
+    public CharacterStats.characterTypes ParentType { get; set; }
     public bool AttackStart { get; set; }
     public bool IsBlocking { get; set; }
     public bool CanBlock { get; set; }

@@ -20,6 +20,8 @@ public class SpawnerInfo : ScriptableObject
         public float timePerMultiSpawn;
         public int maximumSpawns;
         public int spawnsCheckThreshold;
+        [Range(0f, 1f)]
+        public float spawnChance = 1f;
     }
 
 

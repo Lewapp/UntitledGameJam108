@@ -4,6 +4,7 @@ using static InfoStore;
 public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
 {
     public int shieldAmount { get; set; }    // Current number of shield points available for blocking
+    public float mass { get; set; }
     public bool difficultyApplied { get; set; }    // States whether difficulty has already been applied or not
 
     public CharacterStats.characterTypes characterType;    // Reference to character's base stats
@@ -219,10 +220,16 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
                 {
                     maxHealth = cds.maxHealth;
                     currentHealth = maxHealth;
+                    mass = cds.mass;
                 }
             }
         }
 
         difficultyApplied = true;
+    }
+
+    public CharacterStats.characterTypes GetCharacterType()
+    {
+        return characterType;
     }
 }

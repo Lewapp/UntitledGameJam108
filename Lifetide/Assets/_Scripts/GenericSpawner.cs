@@ -4,13 +4,13 @@ using System;
 using System.Linq;
 using System.Collections;
 
-public class Spawner : MonoBehaviour, IDirectable
+public class Spawner : MonoBehaviour, IDirectable, ISpawnerable
 {
     #region Properties and References
 
     public bool difficultyApplied { get; set; }
+    public bool personalLock { get; set; }
 
-    public bool personalLock;
     public SpawnerType spawnerType;
     public SpawnerInfo spawnerInfo;
 
@@ -163,8 +163,14 @@ public class Spawner : MonoBehaviour, IDirectable
         nextRandomTime = UnityEngine.Random.Range(spawnerInfo.stats[difficultyIndex].spawnTimeRange.x, spawnerInfo.stats[difficultyIndex].spawnTimeRange.y);
     }
 
+    public SpawnerType GetSpawnType()
+    {
+        return spawnerType;
+    }
+
     public enum SpawnerType
     { 
+        None,
         Generic,
         Special,
         Boss,

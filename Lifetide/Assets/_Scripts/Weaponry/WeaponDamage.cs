@@ -2,8 +2,10 @@ using UnityEngine;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(BoxCollider2D))]  
-public class WeaponDamage : MonoBehaviour
+public class WeaponDamage : MonoBehaviour, IDirectable
 {
+    public bool difficultyApplied { get; set ; }
+
     // Reference to the weapon's status interface (used to check if the weapon is attacking).
     private IWeaponStatusable weaponStatus;
 
@@ -11,15 +13,26 @@ public class WeaponDamage : MonoBehaviour
     public List<GameObject> hitEnemies;
 
     private float currentPenPower;
+    private float damageMp;
+    private float penMP;
+
+    private void Awake()
+    {
+        IWeaponStatusable status = GetComponent<IWeaponStatusable>();
+        // If a weapon status interface is found, assign it and break the loop.
+        if (status != null) weaponStatus = status;
+        SpawnDirector.Register(this, gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        SpawnDirector.UnRegister(this, gameObject);
+    }
 
     public void Start()
     {
         // Initialise the list of enemies that the weapon has already hit.
         hitEnemies = new List<GameObject>();
-
-        IWeaponStatusable status = GetComponent<IWeaponStatusable>();
-        // If a weapon status interface is found, assign it and break the loop.
-        if (status != null) weaponStatus = status;
     }
 
     private void Update()
@@ -34,14 +47,25 @@ public class WeaponDamage : MonoBehaviour
 
             if (weaponStatus.AttackStart)
             {
-                currentPenPower = weaponStatus.GetWeaponStats().penPower;
+                currentPenPower = weaponStatus.GetWeaponStats().penPower * (1 + penMP);
             }
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.isTrigger || collision.tag == transform.tag) return;
+        bool sameTeam = true;
+        if (weaponStatus.ParentType == CharacterStats.characterTypes.Player)
+        {
+            if (collision.CompareTag("Enemy"))
+                sameTeam = false;
+        }
+        else if (collision.CompareTag("Player"))
+        {
+            sameTeam = false;
+        }
+
+        if (collision.isTrigger || sameTeam) return;
 
         // If the enemy has already been hit, do not apply damage again.
         if (hitEnemies.Contains(collision.gameObject)) return;
@@ -49,22 +73,48 @@ public class WeaponDamage : MonoBehaviour
         // Check if the weapon is currently attacking.
         if (weaponStatus.IsAttacking())
         {
-            Debug.Log(collision.gameObject.name + "'s weapon is attacking");
-
             // Try to find a damageable component (i.e. an enemy) in the collided object.
             IDamageable damageable = collision.gameObject.GetComponent<IDamageable>();
 
             // If the collided object is damageable, apply damage and add it to the hit list.
             if (damageable != null)
             {
-                float powerPercent = currentPenPower / weaponStatus.GetWeaponStats().penPower;
+                float powerPercent = currentPenPower / (weaponStatus.GetWeaponStats().penPower * (1 + penMP));
 
-                damageable.TakeDamage(weaponStatus.GetWeaponStats().maxDamage * powerPercent, gameObject);
+                float damage = weaponStatus.GetWeaponStats().maxDamage * powerPercent;
+                damage += damage * damageMp;
+                damage = Mathf.Clamp(damage, 0, Mathf.Infinity);
+
+                damageable.TakeDamage(damage, gameObject);
                 hitEnemies.Add(collision.gameObject);  // Add the enemy to the list to prevent multiple hits.
 
-                currentPenPower -= 1f;
+                currentPenPower -= damageable.mass;
                 currentPenPower = Mathf.Clamp(currentPenPower, 0, Mathf.Infinity);
             }
+        }
+    }
+
+    public void SetDifficulty(DifficultyInfo difficultyInfo)
+    {
+        if (!difficultyInfo)
+            return;
+
+        for (int i = 0; i < difficultyInfo.characterStats.Count; i++)
+        {
+            if (difficultyInfo.characterStats[i].characterType != weaponStatus.ParentType)
+            {
+                continue;
+            }
+
+            foreach (CharacterStats.CharacterDifficultyStats cds in difficultyInfo.characterStats[i].stats)
+            {
+                if (cds.difficulty == difficultyInfo.difficultyType)
+                {
+                    damageMp = cds.damageMp;
+                    penMP = cds.penetrationMp;
+                }
+            }
+            break;
         }
     }
 }

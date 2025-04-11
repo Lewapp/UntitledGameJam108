@@ -10,43 +10,43 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: edc9f40fae48b574ab4818d1425354ab, type: 3}
-  m_Name: S_GenericSpawner
+  m_Name: S_SpecialSpawner
   m_EditorClassIdentifier: 
   locked: 0
   stats:
   - difficulty: 0
     selfDestructAmount: 0
-    selfLockAmount: 0
+    selfLockAmount: 1
     spawnObjects:
-    - spawnee: {fileID: 9200437086645507091, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
-      spawnInfluence: 1
-    spawnTimeRange: {x: 3, y: 24}
+    - spawnee: {fileID: 5993846212901037953, guid: 19bb037f5d5713a41ab1187823e93921, type: 3}
+      spawnInfluence: 0
+    spawnTimeRange: {x: 1, y: 5}
     spawnAmountRange: {x: 1, y: 2}
     timePerMultiSpawn: 2
     maximumSpawns: 12
-    spawnsCheckThreshold: 5
-    spawnChance: 1
+    spawnsCheckThreshold: 1
+    spawnChance: 0
   - difficulty: 1
     selfDestructAmount: 0
-    selfLockAmount: 0
+    selfLockAmount: 1
     spawnObjects:
-    - spawnee: {fileID: 9200437086645507091, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
-      spawnInfluence: 1
-    spawnTimeRange: {x: 2, y: 22}
-    spawnAmountRange: {x: 1, y: 3}
+    - spawnee: {fileID: 5993846212901037953, guid: 19bb037f5d5713a41ab1187823e93921, type: 3}
+      spawnInfluence: 0
+    spawnTimeRange: {x: 1, y: 3}
+    spawnAmountRange: {x: 1, y: 2}
     timePerMultiSpawn: 1
     maximumSpawns: 20
-    spawnsCheckThreshold: 5
-    spawnChance: 1
+    spawnsCheckThreshold: 1
+    spawnChance: 0
   - difficulty: 2
     selfDestructAmount: 0
-    selfLockAmount: 0
+    selfLockAmount: 2
     spawnObjects:
-    - spawnee: {fileID: 9200437086645507091, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
-      spawnInfluence: 1
-    spawnTimeRange: {x: 1.5, y: 18}
-    spawnAmountRange: {x: 1, y: 4}
+    - spawnee: {fileID: 5993846212901037953, guid: 19bb037f5d5713a41ab1187823e93921, type: 3}
+      spawnInfluence: 0
+    spawnTimeRange: {x: 0, y: 1}
+    spawnAmountRange: {x: 1, y: 2}
     timePerMultiSpawn: 0.5
-    maximumSpawns: 30
+    maximumSpawns: 1
     spawnsCheckThreshold: 5
-    spawnChance: 1
+    spawnChance: 0

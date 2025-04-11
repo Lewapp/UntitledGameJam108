@@ -8,6 +8,7 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
 {
     #region Properties and References
 
+    public CharacterStats.characterTypes ParentType { get; set; }
     public bool AttackStart { get; set; }
     public bool IsBlocking { get; set; }
     public bool CanBlock { get; set; }
@@ -28,6 +29,10 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
 
     private void Awake()
     {
+        if (transform?.parent.GetComponent<IDamageable>() != null)
+        {
+            ParentType = transform.parent.GetComponent<IDamageable>().GetCharacterType();
+        }
         waitingList = new List<AnimationTask>();
         CanBlock = true;
     }

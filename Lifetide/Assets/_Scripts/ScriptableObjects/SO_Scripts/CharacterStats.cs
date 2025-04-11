@@ -9,6 +9,7 @@ public class CharacterStats : ScriptableObject
 
     public enum characterTypes
     {
+        None,
         Player,
         Basic,
         Dualer,
@@ -26,6 +27,7 @@ public class CharacterStats : ScriptableObject
         public float mass; // Mass of Character
         public float moveSpeed;
         public float damageMp;
+        public float penetrationMp;
         public float delayMp;
         public float attackSpeedMp;
     }
