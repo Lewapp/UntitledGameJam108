@@ -326,6 +326,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterType: 2
+  hitSpawn: {fileID: 4750333317665291570, guid: 3728ec032f178644589f7bead06a6324, type: 3}
   currentHealth: 0
 --- !u!114 &5088035741098551034
 MonoBehaviour:
@@ -358,6 +359,7 @@ MonoBehaviour:
   weapons:
   - {fileID: 4610612032605115772}
   moveSpeed: 2.5
+  attackMovement: 0
 --- !u!1001 &5658044343805070549
 PrefabInstance:
   m_ObjectHideFlags: 0

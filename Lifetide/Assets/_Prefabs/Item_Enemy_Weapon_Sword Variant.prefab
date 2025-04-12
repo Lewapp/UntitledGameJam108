@@ -32,6 +32,10 @@ PrefabInstance:
       propertyPath: swingAnimations.Array.data[1].delayScale
       value: 0.3
       objectReference: {fileID: 0}
+    - target: {fileID: 5613604831028933811, guid: 5b2fab6e0f3671e4f9ac99599c2e9c64, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 3e97b743b083df74c9f12fa6f515ddb9, type: 3}
     - target: {fileID: 7102177323942449956, guid: 5b2fab6e0f3671e4f9ac99599c2e9c64, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.26

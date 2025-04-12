@@ -25,7 +25,7 @@ MonoBehaviour:
     timePerMultiSpawn: 2
     maximumSpawns: 12
     spawnsCheckThreshold: 1
-    spawnChance: 1
+    spawnChance: 0.2
   - difficulty: 1
     selfDestructAmount: 0
     selfLockAmount: 1
@@ -37,7 +37,7 @@ MonoBehaviour:
     timePerMultiSpawn: 1
     maximumSpawns: 20
     spawnsCheckThreshold: 1
-    spawnChance: 1
+    spawnChance: 0.5
   - difficulty: 2
     selfDestructAmount: 0
     selfLockAmount: 2
@@ -49,4 +49,4 @@ MonoBehaviour:
     timePerMultiSpawn: 0.5
     maximumSpawns: 1
     spawnsCheckThreshold: 5
-    spawnChance: 1
+    spawnChance: 0.8

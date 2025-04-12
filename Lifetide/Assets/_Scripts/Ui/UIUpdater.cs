@@ -42,7 +42,7 @@ public class UIUpdater : MonoBehaviour
             if (thisInfoStore.CheckInfoLock(InfoType.Health))
             {
                 thisInfoStore.TryGetInfo(InfoType.Health, out float health);
-                healthTXT.text = "Health: " + health;
+                healthTXT.text = "Health: " + (int)health;
             }
 
             // Check and update shield display
@@ -56,7 +56,7 @@ public class UIUpdater : MonoBehaviour
             if (thisInfoStore.CheckInfoLock(InfoType.Dashes))
             {
                 thisInfoStore.TryGetInfo(InfoType.Dashes, out float dashes);
-                dashesTXT.text = "Dashes: " + dashes;
+                dashesTXT.text = "Dashes: " + (int)dashes;
             }
         }
     }

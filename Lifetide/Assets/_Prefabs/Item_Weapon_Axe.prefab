@@ -76,7 +76,7 @@ SpriteRenderer:
   m_SortingLayerID: 77842629
   m_SortingLayer: 1
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 2d4834376f8a85c44b0b4e9d520404b7, type: 3}
+  m_Sprite: {fileID: 21300000, guid: dc822696f1077784a9ce5dbfecbe0dcf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -100,7 +100,7 @@ GameObject:
   - component: {fileID: 1264897271358658043}
   - component: {fileID: 6102130018876449115}
   m_Layer: 0
-  m_Name: Item_Weapon_Sword
+  m_Name: Item_Weapon_Axe
   m_TagString: PlayerWeapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -134,16 +134,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca6f7b112a4d85f4da32523ecfd562e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stats: {fileID: 11400000, guid: f50cb5d3fa68c7f4e8e47667f94e5ca1, type: 2}
+  stats: {fileID: 11400000, guid: 9b8e6318d5bcb59448b85a4b30f43075, type: 2}
   swingAnimations:
-  - duration: 0.5
+  - duration: 0.65
     location: {x: -0.26, y: 0.51, z: 0}
     rotation: 120
     delay: 0
     delayScale: 0
     longWay: 1
     continues: 0
-  - duration: 0.5
+  - duration: 0.65
     location: {x: 0.26, y: 0.51, z: 0}
     rotation: 210
     delay: 0

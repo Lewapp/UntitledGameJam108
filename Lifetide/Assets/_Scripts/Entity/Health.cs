@@ -8,6 +8,7 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
     public bool difficultyApplied { get; set; }    // States whether difficulty has already been applied or not
 
     public CharacterStats.characterTypes characterType;    // Reference to character's base stats
+    public GameObject hitSpawn;
     public float currentHealth;              // Current health value of the character
 
     private IWeaponReadable weaponInfo;      // Cached weapon information 
@@ -72,7 +73,14 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
         if (!ShieldCheck(source.transform))
             currentHealth -= amount;
 
+        currentHealth = (int)currentHealth;
+
         HealthCheck();
+
+        if (amount > 0 && hitSpawn)
+        {
+            Instantiate(hitSpawn, transform.position, Quaternion.identity);
+        }
     }
 
     /// <summary>
