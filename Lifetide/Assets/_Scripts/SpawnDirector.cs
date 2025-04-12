@@ -19,7 +19,7 @@ public class SpawnDirector : MonoBehaviour
     private int spawners = 0;
     private float nextSpecialTime;
 
-    private void Awake()
+    private void Start()
     {
         difficultyManager = GetComponent<IUiReadable>();
         if (difficultyManager != null)
@@ -27,20 +27,18 @@ public class SpawnDirector : MonoBehaviour
             InfoStore infoStore = difficultyManager.GetInfo();
             infoStore.TryGetInfo(InfoStore.InfoType.Difficulty, out DifficultyInfo difficultyInfo);
             currentDifficulty = difficultyInfo;
-
             currentDifficulty.genericSpawnerInfo.locked = false;
             currentDifficulty.specialSpawnerInfo.locked = true;
             //currentDifficulty.bossSpawnerInfo.locked = true;
         }
-    }
-
-    private void Start()
-    {
         LockNonGenericSpawners();
     }
 
     private void Update()
     {
+        if (currentDifficulty == null)
+            return;
+
         if (spawners < spawnDirectables.Count)
         {
             foreach (IDirectable directable in spawnDirectables[spawners].GetComponents<IDirectable>())

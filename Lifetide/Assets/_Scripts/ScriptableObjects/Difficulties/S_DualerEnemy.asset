@@ -15,7 +15,7 @@ MonoBehaviour:
   characterType: 3
   stats:
   - difficulty: 0
-    maxHealth: 12
+    maxHealth: 15
     mass: 2
     moveSpeed: 2.5
     attackMoveSpeed: 2
@@ -24,7 +24,7 @@ MonoBehaviour:
     delayMp: -0.2
     attackSpeedMp: -0.2
   - difficulty: 1
-    maxHealth: 22
+    maxHealth: 23
     mass: 2
     moveSpeed: 3
     attackMoveSpeed: 2.5
@@ -33,7 +33,7 @@ MonoBehaviour:
     delayMp: 0
     attackSpeedMp: 0
   - difficulty: 2
-    maxHealth: 27
+    maxHealth: 30
     mass: 2.5
     moveSpeed: 3.2
     attackMoveSpeed: 2.7

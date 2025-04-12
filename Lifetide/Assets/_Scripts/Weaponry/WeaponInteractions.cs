@@ -15,6 +15,7 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     public float AttackSpeedMultiplier { get; set; }
     public float DelayMultiplier { get; set; }
 
+    public PlayerInfo.WeaponTypes weaponType;
     public WeaponStats stats;               // The stats of the weapon being used
     public SwingInfo[] swingAnimations;     // Swing animations to cycle through when attacking.
     public SwingInfo[] blockAnimations;     // Block animations for entering and exiting block state.
@@ -39,6 +40,8 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
 
     private void Update()
     {
+        if (!isActiveAndEnabled) return;
+
         CheckWaitingListActive();
 
         // Automatically break block if no longer able to block while currently blocking.
@@ -58,7 +61,8 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     /// <param name="context">The input context from the block input action.</param>
     public void PlayerAttack(InputAction.CallbackContext context)
     {
-        Attack();
+        if (isActiveAndEnabled)
+            Attack();
     }
 
     /// <summary>
@@ -67,7 +71,8 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     /// <param name="context">The input context from the block input action.</param>
     public void PlayerBlock(InputAction.CallbackContext context)
     {
-        Block();
+        if (isActiveAndEnabled)
+            Block();
     }
 
     /// <summary>
@@ -75,7 +80,8 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     /// </summary>
     public void EnemyAttack()
     {
-        Attack();
+        if (isActiveAndEnabled)
+            Attack();
     }
 
     #endregion
@@ -130,7 +136,7 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     /// </summary>
     private void Attack()
     {
-        if (startUpIgnore)
+        if (startUpIgnore || !isActiveAndEnabled)
         {
             startUpIgnore = false;
             return;
@@ -342,6 +348,8 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     /// </summary>
     private bool CheckWaitingListActive()
     {
+        if (!isActiveAndEnabled) return false;
+
         for (int i = 0; i < waitingList.Count; i++)
         {
             if (waitingList[i]?.activeCoroutine != null)
@@ -388,6 +396,11 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         }
 
         return false;
+    }
+
+    public PlayerInfo.WeaponTypes GetWeaponType()
+    {
+        return weaponType;
     }
 
     #endregion

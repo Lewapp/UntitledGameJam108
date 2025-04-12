@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: S_Sword
   m_EditorClassIdentifier: 
   weaponName: Sword
-  maxDamage: 14
+  maxDamage: 11
   penPower: 12
   blocking: 6
   blockRange: 0.4

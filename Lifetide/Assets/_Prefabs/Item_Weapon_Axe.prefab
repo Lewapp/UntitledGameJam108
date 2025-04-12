@@ -134,6 +134,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca6f7b112a4d85f4da32523ecfd562e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  weaponType: 1
   stats: {fileID: 11400000, guid: 9b8e6318d5bcb59448b85a4b30f43075, type: 2}
   swingAnimations:
   - duration: 0.65

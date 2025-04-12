@@ -6,7 +6,8 @@ public class WeaponInfo : MonoBehaviour, IWeaponReadable
 
     public IWeaponStatusable weaponStatus { get; set; }     // Interface reference for accessing weapon status functionality
     public GameObject weapon { get; set; }                  // The weapon being tracked, with public getter and setter
-
+    public PlayerInfo playerInfo;
+    public GameObject[] weapons;
     public GameObject currentWeapon;                        // The currently equipped weapon GameObject, assigned via the Inspector
 
 
@@ -14,6 +15,21 @@ public class WeaponInfo : MonoBehaviour, IWeaponReadable
 
     private void Awake()
     {
+        foreach (GameObject weapon in weapons)
+        {
+            weapon.SetActive(false);
+            IWeaponStatusable weaponStatus = weapon.GetComponent<IWeaponStatusable>();
+            if (weaponStatus == null)
+                continue;
+
+            if (playerInfo.selectedWeapon == weaponStatus.GetWeaponType())
+            {
+                weapon.SetActive(true);
+                currentWeapon = weapon;
+            }
+
+        }
+
         UpdateWeaponInfo();
     }
 

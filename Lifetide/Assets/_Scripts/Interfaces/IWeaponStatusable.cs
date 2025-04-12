@@ -13,5 +13,6 @@ public interface IWeaponStatusable
     public bool IsAttacking();
     public bool IsInAnimation();
     public WeaponStats GetWeaponStats();
+    public PlayerInfo.WeaponTypes GetWeaponType();
 
 }

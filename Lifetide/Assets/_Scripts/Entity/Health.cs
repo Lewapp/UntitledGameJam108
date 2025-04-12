@@ -71,16 +71,17 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
 
         // If shield fails, apply damage to health
         if (!ShieldCheck(source.transform))
+        {
             currentHealth -= amount;
+            if (amount > 0 && hitSpawn)
+            {
+                Instantiate(hitSpawn, transform.position, Quaternion.identity);
+            }
+        }
 
         currentHealth = (int)currentHealth;
 
         HealthCheck();
-
-        if (amount > 0 && hitSpawn)
-        {
-            Instantiate(hitSpawn, transform.position, Quaternion.identity);
-        }
     }
 
     /// <summary>
