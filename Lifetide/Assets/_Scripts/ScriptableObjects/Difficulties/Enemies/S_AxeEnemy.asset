@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72521522c0d58e344b6f999239444efa, type: 3}
+  m_Name: S_AxeEnemy
+  m_EditorClassIdentifier: 
+  characterType: 2
+  stats:
+  - difficulty: 0
+    maxHealth: 10
+    mass: 1
+    moveSpeed: 1.8
+    attackMoveSpeed: 0
+    damageMp: -0.2
+    penetrationMp: 0
+    delayMp: -0.2
+    attackSpeedMp: -0.2
+  - difficulty: 1
+    maxHealth: 20
+    mass: 1
+    moveSpeed: 2.2
+    attackMoveSpeed: 0
+    damageMp: 0
+    penetrationMp: 0
+    delayMp: 0
+    attackSpeedMp: 0
+  - difficulty: 2
+    maxHealth: 25
+    mass: 2
+    moveSpeed: 2.7
+    attackMoveSpeed: 0
+    damageMp: 0.2
+    penetrationMp: 0
+    delayMp: 0.2
+    attackSpeedMp: 0.2

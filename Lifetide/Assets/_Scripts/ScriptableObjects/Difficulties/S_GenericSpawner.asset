@@ -20,6 +20,8 @@ MonoBehaviour:
     spawnObjects:
     - spawnee: {fileID: 9200437086645507091, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
       spawnInfluence: 1
+    - spawnee: {fileID: 9200437086645507091, guid: 6e1ae8112037b8545af29a3627302a8a, type: 3}
+      spawnInfluence: 0.3
     spawnTimeRange: {x: 3, y: 24}
     spawnAmountRange: {x: 1, y: 2}
     timePerMultiSpawn: 2
@@ -32,6 +34,8 @@ MonoBehaviour:
     spawnObjects:
     - spawnee: {fileID: 9200437086645507091, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
       spawnInfluence: 1
+    - spawnee: {fileID: 9200437086645507091, guid: 6e1ae8112037b8545af29a3627302a8a, type: 3}
+      spawnInfluence: 0.5
     spawnTimeRange: {x: 2, y: 22}
     spawnAmountRange: {x: 1, y: 3}
     timePerMultiSpawn: 1
@@ -44,6 +48,8 @@ MonoBehaviour:
     spawnObjects:
     - spawnee: {fileID: 9200437086645507091, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
       spawnInfluence: 1
+    - spawnee: {fileID: 9200437086645507091, guid: 6e1ae8112037b8545af29a3627302a8a, type: 3}
+      spawnInfluence: 0.75
     spawnTimeRange: {x: 1.5, y: 18}
     spawnAmountRange: {x: 1, y: 4}
     timePerMultiSpawn: 0.5

@@ -75,7 +75,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: d40910985e1a5d147ad3f91feaf43577, type: 3}
   m_Color: {r: 0.764151, g: 0.5586953, b: 0.5586953, a: 1}
   m_FlipX: 0
@@ -189,8 +189,8 @@ GameObject:
   - component: {fileID: 45801045071355260}
   - component: {fileID: 5088035741098551034}
   - component: {fileID: 2135388912164239379}
-  m_Layer: 0
-  m_Name: Enemy
+  m_Layer: 7
+  m_Name: SwordEnemy
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
