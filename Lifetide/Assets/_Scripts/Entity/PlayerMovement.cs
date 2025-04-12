@@ -215,4 +215,6 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
 
         return infoStore;
     }
+
+    public void Activate() { }
 }

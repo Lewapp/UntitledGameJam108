@@ -1,7 +1,9 @@
 using TMPro;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 using static InfoStore;
+
 
 public class UIUpdater : MonoBehaviour
 {
@@ -13,6 +15,7 @@ public class UIUpdater : MonoBehaviour
     public TextMeshProUGUI dashesTXT;
     // Reference to the player GameObject whose stats will be tracked
     public GameObject player;
+
 
     // A list of components implementing IUiReadable, used to pull UI-relevant data
     private List<IUiReadable> uiReadings = new List<IUiReadable>();
@@ -28,21 +31,41 @@ public class UIUpdater : MonoBehaviour
             {
                 uiReadings.Add(playerUI);
             }
+            foreach (Transform child in transform)
+            {
+                IUiReadable playerUI = child.GetComponent<IUiReadable>();
+
+                if (playerUI != null)
+                    uiReadings.Add(playerUI);
+            }
         }
+
+        StartCoroutine(UiUpdate());
     }
 
-    private void Update()
+    private IEnumerator UiUpdate()
     {
+        yield return null; 
+
         for (int i = 0; i < uiReadings.Count; i++)
         {
             // Retrieve the information store for this UI-readable component
             InfoStore thisInfoStore = uiReadings[i].GetInfo();
+            if (thisInfoStore == null)
+                continue;
 
             // Check and update health display
             if (thisInfoStore.CheckInfoLock(InfoType.Health))
             {
                 thisInfoStore.TryGetInfo(InfoType.Health, out float health);
-                healthTXT.text = "Health: " + (int)health;
+                healthTXT.text = "Health: " + (int)Mathf.Clamp(health, 0f, Mathf.Infinity);
+                if (health <= 0)
+                {
+                    for (int x = 0; x < uiReadings.Count; x++)
+                    {
+                        uiReadings[x].Activate();
+                    }
+                }
             }
 
             // Check and update shield display
@@ -59,5 +82,7 @@ public class UIUpdater : MonoBehaviour
                 dashesTXT.text = "Dashes: " + (int)dashes;
             }
         }
-    }
+
+        StartCoroutine(UiUpdate());
+    }  
 }

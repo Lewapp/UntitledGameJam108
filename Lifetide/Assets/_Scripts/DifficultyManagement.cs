@@ -27,4 +27,6 @@ public class DifficultyManagement : MonoBehaviour, IUiReadable
 
         return infoStore;
     }
+
+    public void Activate() { }
 }

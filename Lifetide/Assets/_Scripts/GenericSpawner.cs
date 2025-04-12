@@ -173,6 +173,7 @@ public class Spawner : MonoBehaviour, IDirectable, ISpawnerable
         None,
         Generic,
         Special,
+        Horde,
         Boss,
     }
 }

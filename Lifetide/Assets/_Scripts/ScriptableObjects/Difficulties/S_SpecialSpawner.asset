@@ -23,7 +23,7 @@ MonoBehaviour:
     spawnTimeRange: {x: 1, y: 5}
     spawnAmountRange: {x: 1, y: 2}
     timePerMultiSpawn: 2
-    maximumSpawns: 12
+    maximumSpawns: 2
     spawnsCheckThreshold: 1
     spawnChance: 0.2
   - difficulty: 1
@@ -35,7 +35,7 @@ MonoBehaviour:
     spawnTimeRange: {x: 1, y: 3}
     spawnAmountRange: {x: 1, y: 2}
     timePerMultiSpawn: 1
-    maximumSpawns: 20
+    maximumSpawns: 3
     spawnsCheckThreshold: 1
     spawnChance: 0.5
   - difficulty: 2
@@ -47,6 +47,6 @@ MonoBehaviour:
     spawnTimeRange: {x: 0, y: 1}
     spawnAmountRange: {x: 1, y: 2}
     timePerMultiSpawn: 0.5
-    maximumSpawns: 1
+    maximumSpawns: 4
     spawnsCheckThreshold: 5
     spawnChance: 0.8

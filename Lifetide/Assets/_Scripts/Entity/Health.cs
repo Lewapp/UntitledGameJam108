@@ -111,7 +111,6 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
 
             // Check if attack was within blocking angle
             float blockRange = 1 - CheckBlockingPotential(source);
-
             // If too far outside block range, shield breaks completely
             if (blockRange > weaponStats.blockRange)
             {
@@ -134,7 +133,10 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
     /// </summary>
     private float CheckBlockingPotential(Transform source)
     {
-        Vector2 direction = (source.position - transform.position).normalized;
+        Vector2 sourcePosition = new Vector2(source.position.x, source.position.y);
+        Vector2 thisPosition = new Vector2(transform.position.x, transform.position.y);
+
+        Vector2 direction = (sourcePosition - thisPosition).normalized;
 
         float staringAmount = Vector2.Dot(transform.up, direction);
         staringAmount = Mathf.Clamp01((staringAmount + 1f) / 2);
@@ -241,4 +243,6 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
     {
         return characterType;
     }
+
+    public void Activate() { }
 }

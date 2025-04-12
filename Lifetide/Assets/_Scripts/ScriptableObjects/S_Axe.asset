@@ -15,7 +15,7 @@ MonoBehaviour:
   weaponName: Axe
   maxDamage: 25
   penPower: 4
-  blocking: 4
+  blocking: 2
   blockRange: 0.5
   shieldRechargeRate: {x: 2.5, y: 2}
   moveSpeed: 10

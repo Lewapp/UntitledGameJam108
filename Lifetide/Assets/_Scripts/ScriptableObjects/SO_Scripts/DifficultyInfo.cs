@@ -16,6 +16,7 @@ public class DifficultyInfo : ScriptableObject
     public float bossChance;
     public SpawnerInfo genericSpawnerInfo;
     public SpawnerInfo specialSpawnerInfo;
+    public SpawnerInfo hordeSpawnerInfo;
     public SpawnerInfo bossSpawnerInfo;
 
     public enum Difficulties

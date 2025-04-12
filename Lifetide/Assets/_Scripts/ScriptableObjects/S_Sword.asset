@@ -15,7 +15,7 @@ MonoBehaviour:
   weaponName: Sword
   maxDamage: 11
   penPower: 12
-  blocking: 6
+  blocking: 4
   blockRange: 0.4
   shieldRechargeRate: {x: 2.5, y: 1.5}
   moveSpeed: 15

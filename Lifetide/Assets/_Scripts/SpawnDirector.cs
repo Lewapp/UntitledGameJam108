@@ -12,12 +12,16 @@ public class SpawnDirector : MonoBehaviour
     public static List<GameObject> spawnedWeaponsMemory = new List<GameObject>();
 
     public GameObject player;
+    public float difficultyMultiplier;
     public Vector2 specialSpawnRate;
+    public Vector2 hordeSpawnRate;
 
     private IUiReadable difficultyManager;
     private DifficultyInfo currentDifficulty;
     private int spawners = 0;
     private float nextSpecialTime;
+    private float nextHordeTime;
+    private float timeSurvived = 0f;
 
     private void Start()
     {
@@ -32,12 +36,19 @@ public class SpawnDirector : MonoBehaviour
             //currentDifficulty.bossSpawnerInfo.locked = true;
         }
         LockNonGenericSpawners();
+
+        if (currentDifficulty.difficultyType != DifficultyInfo.Difficulties.Hard)
+        {
+            nextHordeTime = hordeSpawnRate.x;
+        }
     }
 
     private void Update()
     {
         if (currentDifficulty == null)
             return;
+
+        timeSurvived += Time.deltaTime;
 
         if (spawners < spawnDirectables.Count)
         {
@@ -51,11 +62,34 @@ public class SpawnDirector : MonoBehaviour
         spawnedEnemiesMemory = CompareLists(spawnedEnemies, spawnedEnemiesMemory, out int eCount);
         spawnedWeaponsMemory = CompareLists(spawnedWeapons, spawnedWeaponsMemory, out int wCount);
 
+        UniqueSpawn();
+    }
+
+    private void UniqueSpawn()
+    {
+        Vector2 minMax;
+        float multiplier = Time.deltaTime * difficultyMultiplier;
+
         nextSpecialTime -= Time.deltaTime;
         if (nextSpecialTime <= 0)
         {
-            nextSpecialTime = Random.Range(specialSpawnRate.x, specialSpawnRate.y);
-            AttemptSpecialSpawn();
+            minMax = specialSpawnRate;
+            minMax.x = minMax.x * multiplier;
+            minMax.y = minMax.y * multiplier;
+
+            nextSpecialTime = Mathf.Clamp(Random.Range(specialSpawnRate.x - minMax.x, specialSpawnRate.y - -minMax.y), 0, specialSpawnRate.y);
+            AttemptAtLockedSpawners(Spawner.SpawnerType.Special, currentDifficulty.specialSpawnerInfo);
+        }
+
+        nextHordeTime -= Time.deltaTime;
+        if (nextHordeTime <= 0)
+        {
+            minMax = hordeSpawnRate;
+            minMax.x = minMax.x * multiplier;
+            minMax.y = minMax.y * multiplier;
+
+            nextHordeTime = Mathf.Clamp(Random.Range(hordeSpawnRate.x - minMax.x, hordeSpawnRate.y - minMax.y), 0, hordeSpawnRate.y);
+            AttemptAtLockedSpawners(Spawner.SpawnerType.Horde, currentDifficulty.hordeSpawnerInfo);
         }
     }
 
@@ -72,7 +106,7 @@ public class SpawnDirector : MonoBehaviour
         }
     }
 
-    private void AttemptSpecialSpawn()
+    private void AttemptAtLockedSpawners(Spawner.SpawnerType chosenType, SpawnerInfo spawnerInfo)
     {
         bool success = true;
 
@@ -83,27 +117,27 @@ public class SpawnDirector : MonoBehaviour
             if (spawnerable == null)
                 continue;
 
-            if (spawnerable.GetSpawnType() == Spawner.SpawnerType.Special)
+            if (spawnerable.GetSpawnType() == chosenType)
                 specialSpawners.Add(spawnerable);
         }
 
         int index = 0;
-        for (int i = 0; i < currentDifficulty.specialSpawnerInfo.stats.Length; i++)
+        for (int i = 0; i < spawnerInfo.stats.Length; i++)
         {
-            if (currentDifficulty.specialSpawnerInfo.stats[i].difficulty == currentDifficulty.difficultyType)
+            if (spawnerInfo.stats[i].difficulty == currentDifficulty.difficultyType)
             {
                 index = i;
                 break;
             }
         }
 
-        currentDifficulty.specialSpawnerInfo.locked = false;
+        spawnerInfo.locked = false;
         List<ISpawnerable> usedSpawners = new List<ISpawnerable>();
         float chance = 0f;
         while (success)
         {
             success = false;
-            if (currentDifficulty.specialSpawnerInfo.stats[index].spawnChance <= 0)
+            if (spawnerInfo.stats[index].spawnChance <= 0)
                 break;
 
             chance = Random.Range(0f, 1f);
@@ -112,7 +146,7 @@ public class SpawnDirector : MonoBehaviour
                 if (usedSpawners.Contains(spawner))
                     continue;
 
-                if (chance <= currentDifficulty.specialSpawnerInfo.stats[index].spawnChance)
+                if (chance <= spawnerInfo.stats[index].spawnChance)
                 {
                     success = true;
                     usedSpawners.Add(spawner);
