@@ -9,9 +9,17 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 45801045071355260, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
+      propertyPath: hitSound
+      value: 
+      objectReference: {fileID: 4459641380597028966, guid: 9494144c69988f546b1c83f0969d8b41, type: 3}
+    - target: {fileID: 45801045071355260, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
       propertyPath: hitSpawn
       value: 
       objectReference: {fileID: 4750333317665291570, guid: bcb12181aa2404f41a323f5122271160, type: 3}
+    - target: {fileID: 45801045071355260, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
+      propertyPath: deathSound
+      value: 
+      objectReference: {fileID: 6624995647138601583, guid: 8d7d050e8d63b694ba795906ce039b49, type: 3}
     - target: {fileID: 45801045071355260, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
       propertyPath: characterType
       value: 4
@@ -110,7 +118,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9200437086645507091, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
       propertyPath: m_Name
-      value: Charger Variant
+      value: Charger
       objectReference: {fileID: 0}
     - target: {fileID: 9200437086645507091, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
       propertyPath: m_Layer

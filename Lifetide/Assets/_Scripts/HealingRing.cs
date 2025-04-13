@@ -5,6 +5,7 @@ public class HealingRing : MonoBehaviour
 {
     public GameObject self;
     public GameObject healingParticle;
+    public GameObject soundEffect;
     public string targetTag;
 
     public float healingAmount;
@@ -26,6 +27,9 @@ public class HealingRing : MonoBehaviour
         {
             timeSinceLastHeal = 0;
             recentlyHealed = new List<GameObject>();
+
+            if (soundEffect)
+                Instantiate(soundEffect, transform.position, Quaternion.identity);
         }
     }
 

@@ -2680,6 +2680,7 @@ MonoBehaviour:
   dashCooldown: 2.5
   maxDashAmount: 3
   maxWeakDashAmount: 4
+  dashSound: {fileID: 4246440581595593653, guid: ce8afed84f485db4eb4343133025de5b, type: 3}
 --- !u!58 &874881745
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -2793,6 +2794,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterType: 1
   hitSpawn: {fileID: 4750333317665291570, guid: d4795fb8b00542d4a9d9a89536ba733f, type: 3}
+  deathSound: {fileID: 0}
+  hitSound: {fileID: 8568524209357518832, guid: 3f808a58c2b605b4694cf11f62a92e29, type: 3}
+  armourSound: {fileID: 8568524209357518832, guid: bb83e5be8fb8884489fa729dfb516430, type: 3}
   currentHealth: 0
 --- !u!114 &874881750
 MonoBehaviour:

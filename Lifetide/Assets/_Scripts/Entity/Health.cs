@@ -11,6 +11,9 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
 
     public CharacterStats.characterTypes characterType;    // Reference to character's base stats
     public GameObject hitSpawn;
+    public GameObject deathSound;
+    public GameObject hitSound;
+    public GameObject armourSound;
     public float currentHealth;              // Current health value of the character
 
     private IWeaponReadable weaponInfo;      // Cached weapon information 
@@ -74,13 +77,21 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
         // If shield fails, apply damage to health
         if (!ShieldCheck(source.transform))
         {
+            if (hitSound)
+                Instantiate(hitSound, transform.position, Quaternion.identity);
+
             currentHealth -= amount;
             if (amount > 0 && hitSpawn)
             {
                 Instantiate(hitSpawn, transform.position, Quaternion.identity);
             }
         }
-        HealthCheck();
+        else
+        {
+            if (armourSound)
+                Instantiate(armourSound, transform.position, Quaternion.identity);
+        }
+            HealthCheck();
 
         IWeaponReadable weaponReadable = source.transform.parent.GetComponent<IWeaponReadable>();
         IDamageable sourceDamagable = source.transform.parent.GetComponent<IDamageable>();
@@ -206,6 +217,10 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
                 GlobalData.playerInfo.specialsKilled++;
             }
         }
+
+        if (deathSound)
+            Instantiate(deathSound, transform.position, Quaternion.identity);
+
         Destroy(gameObject);
     }
 

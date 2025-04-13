@@ -22,6 +22,9 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
     public float maxDashAmount;          // Max amount of strong dashes available before cooldown
     public float maxWeakDashAmount;      // Max total amount of weak + strong dashes allowed before cooldown
 
+    [Header("Sound Effects")]
+    public GameObject dashSound;
+
     private Rigidbody2D rb { get => GetComponent<Rigidbody2D>(); } // Cached reference to Rigidbody2D
     private Vector2 moveDirection;       // Direction of player movement from input
     private Vector2 dashDirection;       // Stored direction for dash movement
@@ -190,13 +193,16 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
             dashTime = dashDuration;           // Set dash duration
             cooldownTime = dashCooldown;       // Start cooldown timer
             dashDirection = moveDirection;     // Store dash direction
-            dashAmount--;                      // Reduce dash count
 
             // Grant temporary invincibility during normal dashes
             if (dashAmount > 0)
             {
+                if (dashSound)
+                    Instantiate(dashSound, transform.position, Quaternion.identity);
                 ApplyInvincibility(dashDuration + (dashAmount * 0.2f));
             }
+
+            dashAmount--;                      // Reduce dash count
         }
     }
 
