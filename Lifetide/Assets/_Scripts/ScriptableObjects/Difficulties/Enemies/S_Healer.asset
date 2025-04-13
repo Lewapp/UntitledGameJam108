@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72521522c0d58e344b6f999239444efa, type: 3}
+  m_Name: S_Healer
+  m_EditorClassIdentifier: 
+  characterType: 5
+  stats:
+  - difficulty: 0
+    maxHealth: 50
+    mass: 3
+    moveSpeed: 0.9
+    attackMoveSpeed: 0
+    damageMp: 0
+    penetrationMp: 0
+    delayMp: 0
+    attackSpeedMp: 0
+  - difficulty: 1
+    maxHealth: 55
+    mass: 3
+    moveSpeed: 1
+    attackMoveSpeed: 0
+    damageMp: 0
+    penetrationMp: 0
+    delayMp: 0
+    attackSpeedMp: 0
+  - difficulty: 2
+    maxHealth: 60
+    mass: 3.5
+    moveSpeed: 1.2
+    attackMoveSpeed: 0
+    damageMp: 0
+    penetrationMp: 0
+    delayMp: 0
+    attackSpeedMp: 0

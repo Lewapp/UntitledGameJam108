@@ -48,13 +48,18 @@ public class EnemyAI : MonoBehaviour, IDirectable
     private void Update()
     {
         // If the player is close enough and weapons exist, try to attack
-        if (playerInRange && weaponUses != null)
+        if (playerInRange && weaponUses != null && weaponInfo.Count > 0)
         {
             if (!attackActive)
                 StartCoroutine(AttackDelay(0.1f)); // Add a slight delay between attacks
         }
         else
         {
+            if (weaponInfo.Count <= 0)
+            {
+                rb.linearVelocity = new Vector2(transform.up.x * moveSpeed, transform.up.y * moveSpeed);
+            }
+
             // If not attacking, continue moving forward
             foreach (IWeaponStatusable weaponI in weaponInfo)
             {

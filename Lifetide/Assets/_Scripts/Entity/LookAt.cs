@@ -11,6 +11,7 @@ public class LookAt : MonoBehaviour
     public float offset;
 
     private GameObject player;
+    private GameObject targetObject;
 
     private void Start()
     {
@@ -19,12 +20,32 @@ public class LookAt : MonoBehaviour
 
     void Update()
     {
-        // Get the current mouse position in world space.
-        Vector3 targetPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        // Get the current player position
+        Vector3 targetPosition = player ? player.transform.position : Vector3.zero;
 
-        if (target == Targets.Player)
+        if (target == Targets.Mouse)
         {
-            targetPosition = player ? player.transform.position : Vector3.zero;
+            targetPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        }
+        else if (target == Targets.RandomEnemy)
+        {
+            if (targetObject)
+            {
+                targetPosition = targetObject.transform.position;
+            }
+            else
+            {
+                foreach (GameObject enemy in GameObject.FindGameObjectsWithTag("Enemy"))
+                {
+                    if (enemy == gameObject)
+                        continue;
+
+                    targetPosition = enemy.transform.position;
+                    targetObject = enemy;
+                    break;
+                }
+            }
+
         }
 
         // Lock the Z-axis to 0 to keep the rotation in topdown 2D.
@@ -46,6 +67,7 @@ public class LookAt : MonoBehaviour
     public enum Targets
     {
         Mouse, 
-        Player
+        Player,
+        RandomEnemy,
     }
 }

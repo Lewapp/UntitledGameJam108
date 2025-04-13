@@ -80,7 +80,6 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
                 Instantiate(hitSpawn, transform.position, Quaternion.identity);
             }
         }
-        currentHealth = (int)currentHealth;
         HealthCheck();
 
         IWeaponReadable weaponReadable = source.transform.parent.GetComponent<IWeaponReadable>();
@@ -95,7 +94,6 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
     public void Heal(float amount, GameObject source)
     {
         currentHealth += amount;
-        currentHealth = (int)currentHealth;
 
         HealthCheck();
     }
@@ -111,7 +109,7 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
             currentHealth = maxHealth;
         }
 
-        if (currentHealth <= 0)
+        if (currentHealth < 1)
         {
             Die();
         }

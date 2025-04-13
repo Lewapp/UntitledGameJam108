@@ -14,7 +14,7 @@ public class CharacterStats : ScriptableObject
         Basic,
         Dualer,
         Charger,
-        Taser,
+        Healer,
         Jumper, 
         Bomber,
     }

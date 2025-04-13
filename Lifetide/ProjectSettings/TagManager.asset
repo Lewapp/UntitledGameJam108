@@ -47,5 +47,8 @@ TagManager:
   - name: Weapon
     uniqueID: 77842629
     locked: 0
+  - name: Particles
+    uniqueID: 3740937981
+    locked: 0
   m_RenderingLayers:
   - Default
