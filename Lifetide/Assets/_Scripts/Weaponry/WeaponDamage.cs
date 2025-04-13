@@ -56,7 +56,7 @@ public class WeaponDamage : MonoBehaviour, IDirectable
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerStay2D(Collider2D collision)
     {
         bool sameTeam = true;
         if (weaponStatus.ParentType == CharacterStats.characterTypes.Player)

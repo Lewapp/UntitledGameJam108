@@ -1,5 +1,7 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using static InfoStore;
+using static Unity.VisualScripting.Member;
 
 public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
 {
@@ -78,7 +80,21 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
                 Instantiate(hitSpawn, transform.position, Quaternion.identity);
             }
         }
+        currentHealth = (int)currentHealth;
+        HealthCheck();
 
+        IWeaponReadable weaponReadable = source.transform.parent.GetComponent<IWeaponReadable>();
+        IDamageable sourceDamagable = source.transform.parent.GetComponent<IDamageable>();
+        if (weaponReadable != null)
+        {
+            foreach (var weapon in weaponReadable.weaponStatus)
+                sourceDamagable.Heal(weapon.GetWeaponStats().healthRegen, source);
+        }
+    }
+
+    public void Heal(float amount, GameObject source)
+    {
+        currentHealth += amount;
         currentHealth = (int)currentHealth;
 
         HealthCheck();
@@ -90,6 +106,11 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
     /// </summary>
     private void HealthCheck()
     {
+        if (currentHealth > maxHealth)
+        {
+            currentHealth = maxHealth;
+        }
+
         if (currentHealth <= 0)
         {
             Die();

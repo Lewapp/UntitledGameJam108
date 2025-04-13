@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: Knife
   maxDamage: 5
+  healthRegen: 1
   penPower: 6
   blocking: 3
   blockRange: 0.35

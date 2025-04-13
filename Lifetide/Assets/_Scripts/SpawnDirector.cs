@@ -78,7 +78,7 @@ public class SpawnDirector : MonoBehaviour
             minMax.x = minMax.x * multiplier;
             minMax.y = minMax.y * multiplier;
 
-            nextSpecialTime = Mathf.Clamp(Random.Range(specialSpawnRate.x - minMax.x, specialSpawnRate.y - -minMax.y), 0, specialSpawnRate.y);
+            nextSpecialTime = Mathf.Clamp(Random.Range(specialSpawnRate.x - minMax.x, specialSpawnRate.y - minMax.y), 0, specialSpawnRate.y);
             AttemptAtLockedSpawners(Spawner.SpawnerType.Special, currentDifficulty.specialSpawnerInfo);
         }
 

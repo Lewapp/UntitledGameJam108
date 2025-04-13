@@ -45,7 +45,8 @@ public class Spawner : MonoBehaviour, IDirectable, ISpawnerable
         SelfLockCheck();
         SelfDestructCheck();
 
-        if (spawnerInfo.locked || personalLock) return;
+        if (spawnerInfo.locked || personalLock) 
+            return;
 
         if (spawnsSinceLastCheck >= spawnerInfo.stats[difficultyIndex].spawnsCheckThreshold)
         {

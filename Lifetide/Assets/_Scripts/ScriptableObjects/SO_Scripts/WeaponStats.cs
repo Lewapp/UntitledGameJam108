@@ -5,6 +5,7 @@ public class WeaponStats : ScriptableObject
 {
     public string weaponName;            // The name of the weapons
     public float maxDamage;              //  The max damage the weapon can deal
+    public float healthRegen;            // Percentage of health restored per kill
     public float penPower;               // The amount of penetration power the weapon has
     public int blocking;                 // How many blocks the weapon has 
     public float blockRange;             // From 0 -> 1 where 1 blocks damage at 360 degrees

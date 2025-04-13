@@ -62,7 +62,7 @@ public class UIUpdater : MonoBehaviour
             if (thisInfoStore.CheckInfoLock(InfoType.Health))
             {
                 thisInfoStore.TryGetInfo(InfoType.Health, out float health);
-                healthTXT.text = "Health: " + (int)Mathf.Clamp(health, 0f, Mathf.Infinity);
+                healthTXT.text = ((int)Mathf.Clamp(health, 0f, Mathf.Infinity)).ToString();
                 if (health <= 0)
                 {
                     for (int x = 0; x < uiReadings.Count; x++)
@@ -79,14 +79,14 @@ public class UIUpdater : MonoBehaviour
             if (thisInfoStore.CheckInfoLock(InfoType.Shield))
             {
                 thisInfoStore.TryGetInfo(InfoType.Shield, out int shield);
-                shieldTXT.text = "Shield: " + shield;
+                shieldTXT.text = shield.ToString();
             }
 
             // Check and update dashes display
             if (thisInfoStore.CheckInfoLock(InfoType.Dashes))
             {
                 thisInfoStore.TryGetInfo(InfoType.Dashes, out float dashes);
-                dashesTXT.text = "Dashes: " + (int)dashes;
+                dashesTXT.text = ((int)dashes).ToString();
             }
         }
 

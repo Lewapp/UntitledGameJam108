@@ -23,7 +23,7 @@ MonoBehaviour:
     spawnTimeRange: {x: 0.1, y: 0.5}
     spawnAmountRange: {x: 1, y: 2}
     timePerMultiSpawn: 0.2
-    maximumSpawns: 16
+    maximumSpawns: 18
     spawnsCheckThreshold: 5
     spawnChance: 0.3
   - difficulty: 1
@@ -34,23 +34,27 @@ MonoBehaviour:
       spawnInfluence: 1
     - spawnee: {fileID: 9200437086645507091, guid: 6e1ae8112037b8545af29a3627302a8a, type: 3}
       spawnInfluence: 0.2
+    - spawnee: {fileID: 7912268224878608810, guid: 039fa86f62d7cf8418a8626d8a947736, type: 3}
+      spawnInfluence: 0.1
     spawnTimeRange: {x: 0.1, y: 0.5}
     spawnAmountRange: {x: 1, y: 2}
     timePerMultiSpawn: 0.2
-    maximumSpawns: 20
+    maximumSpawns: 25
     spawnsCheckThreshold: 5
     spawnChance: 0.6
   - difficulty: 2
     selfDestructAmount: 0
-    selfLockAmount: 10
+    selfLockAmount: 12
     spawnObjects:
     - spawnee: {fileID: 9200437086645507091, guid: 99c87a188b83dd94ea0613a4d3d9abbc, type: 3}
       spawnInfluence: 1
     - spawnee: {fileID: 9200437086645507091, guid: 6e1ae8112037b8545af29a3627302a8a, type: 3}
       spawnInfluence: 0.5
+    - spawnee: {fileID: 7912268224878608810, guid: 039fa86f62d7cf8418a8626d8a947736, type: 3}
+      spawnInfluence: 0.4
     spawnTimeRange: {x: 0.1, y: 0.5}
     spawnAmountRange: {x: 1, y: 2}
     timePerMultiSpawn: 0.2
-    maximumSpawns: 22
+    maximumSpawns: 27
     spawnsCheckThreshold: 5
     spawnChance: 0.75
