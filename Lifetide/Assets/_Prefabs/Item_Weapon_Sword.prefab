@@ -134,15 +134,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca6f7b112a4d85f4da32523ecfd562e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  weaponType: 0
   stats: {fileID: 11400000, guid: f50cb5d3fa68c7f4e8e47667f94e5ca1, type: 2}
   swingAnimations:
-  - duration: 0.5
+  - duration: 0.4
+    location: {x: 0, y: -0.8, z: 0}
+    rotation: 0
+    delay: 0
+    delayScale: 0
+    longWay: 0
+    continues: 1
+    damageBuff: -2
+    penBuff: 0
+  - duration: 0.2
+    location: {x: 0, y: 1.2, z: 0}
+    rotation: 0.4
+    delay: 0.4
+    delayScale: 0.3
+    longWay: 0
+    continues: 1
+    damageBuff: 2
+    penBuff: -1.2
+  - duration: 0.3
     location: {x: -0.26, y: 0.51, z: 0}
     rotation: 120
     delay: 0
     delayScale: 0
-    longWay: 1
+    longWay: 0
     continues: 0
+    damageBuff: 0
+    penBuff: 0
   - duration: 0.5
     location: {x: 0.26, y: 0.51, z: 0}
     rotation: 210
@@ -150,6 +171,17 @@ MonoBehaviour:
     delayScale: 0
     longWay: 1
     continues: 0
+    damageBuff: 0
+    penBuff: 2
+  - duration: 0.5
+    location: {x: -0.26, y: 0.51, z: 0}
+    rotation: 120
+    delay: 0
+    delayScale: 0
+    longWay: 1
+    continues: 0
+    damageBuff: 0
+    penBuff: 2
   blockAnimations:
   - duration: 0.5
     location: {x: -0.6, y: 1, z: 0}
@@ -158,6 +190,8 @@ MonoBehaviour:
     delayScale: 0
     longWay: 0
     continues: 0
+    damageBuff: 0
+    penBuff: 0
   - duration: 0.2
     location: {x: 0.26, y: 0.51, z: 0}
     rotation: 210
@@ -165,6 +199,8 @@ MonoBehaviour:
     delayScale: 0
     longWay: 0
     continues: 0
+    damageBuff: 0
+    penBuff: 0
 --- !u!114 &1264897271358658043
 MonoBehaviour:
   m_ObjectHideFlags: 0

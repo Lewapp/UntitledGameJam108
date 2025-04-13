@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static WeaponInteractions;
 
 public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseable
 {
@@ -12,6 +13,9 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     public bool AttackStart { get; set; }
     public bool IsBlocking { get; set; }
     public bool CanBlock { get; set; }
+    public int attackNo { get; set; }
+    public float damageScale { get; set; }
+    public float penScale { get; set; }
     public float AttackSpeedMultiplier { get; set; }
     public float DelayMultiplier { get; set; }
 
@@ -21,7 +25,6 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     public SwingInfo[] blockAnimations;     // Block animations for entering and exiting block state.
 
     private List<AnimationTask> waitingList;    // Tracks the status of started coroutines
-    private int attackNo = -1;              // Tracks the current index in the attack animation sequence.
     private bool startUpIgnore = true;      // Ignores the first startup input (useful for input buffering quirks).
 
     #endregion
@@ -62,7 +65,7 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     public void PlayerAttack(InputAction.CallbackContext context)
     {
         if (isActiveAndEnabled)
-            Attack();
+            Attack(false);
     }
 
     /// <summary>
@@ -81,7 +84,7 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     public void EnemyAttack()
     {
         if (isActiveAndEnabled)
-            Attack();
+            Attack(false);
     }
 
     #endregion
@@ -106,6 +109,7 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         }
         else
         {
+            attackNo = 0;
             IsBlocking = true;
             AnimationTask task = new AnimationTask();
             task.activeCoroutine = StartCoroutine(DelayAttack(blockAnimations[0], waitingList.Count));
@@ -134,7 +138,7 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     /// Handles the logic for initiating an attack, including animation sequence rotation.
     /// Skips the first input to ignore accidental early inputs after startup.
     /// </summary>
-    private void Attack()
+    private void Attack(bool addition)
     {
         if (startUpIgnore || !isActiveAndEnabled)
         {
@@ -142,17 +146,17 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
             return;
         }
 
-        if (CheckWaitingListActive()) return;
+        if (addition)
+            Debug.Log((CheckWaitingListActive()));
+        if (CheckWaitingListActive() && !addition) return;
 
         IsBlocking = false;
 
         // Return if no swing animations are defined.
         if (swingAnimations.Length <= 0) return;
 
-        // Increment the attack number to select the next animation.
-        attackNo++;
-        // Loop back to the first swing animation if the end of the array is reached.
-        attackNo = (int)Mathf.Repeat(attackNo, swingAnimations.Length);
+        damageScale = swingAnimations[attackNo].damageBuff;
+        penScale = swingAnimations[attackNo].penBuff;
 
         //  Claim that the attack has just started
         StartCoroutine(AttackStartedCheck());
@@ -162,6 +166,11 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         task.activeCoroutine = StartCoroutine(DelayAttack(swingAnimations[attackNo], waitingList.Count));
         task.attackAnimation = false;
         waitingList.Add(task);
+
+        // Increment the attack number to select the next animation.
+        attackNo++;
+        // Loop back to the first swing animation if the end of the array is reached.
+        attackNo = (int)Mathf.Repeat(attackNo, swingAnimations.Length);
     }
 
     /// <summary>
@@ -231,6 +240,8 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
             );
         }
 
+        yield return null;
+
         // Reset the scale to its original size after the delay.
         transform.localScale = startingScale;
 
@@ -246,6 +257,12 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         moveTask.activeCoroutine = StartCoroutine(MoveLerp(swingInfo, waitingList.Count));
         moveTask.attackAnimation = true;
         waitingList.Add(moveTask);
+
+        if (swingInfo.continues)
+        {
+            yield return new WaitForSeconds(swingInfo.duration);
+            Attack(true);
+        }
 
         // Mark this delay coroutine as completed in the waiting list.
         waitingList[listID] = null;
@@ -348,12 +365,13 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
     /// </summary>
     private bool CheckWaitingListActive()
     {
-        if (!isActiveAndEnabled) return false;
-
         for (int i = 0; i < waitingList.Count; i++)
         {
             if (waitingList[i]?.activeCoroutine != null)
+            {
                 return true;
+            }
+
         }
 
         waitingList = new List<AnimationTask>();
@@ -418,8 +436,10 @@ public class WeaponInteractions : MonoBehaviour, IWeaponStatusable, IEnemyUseabl
         public float rotation;       // Target local Z rotation.
         public float delay;          // Time to wait before the animation starts.
         public float delayScale;     // How much the weapon scales during delay.
-        public bool longWay;         // Use long rotation path (e.g., clockwise 270° instead of counter-clockwise 90°).
-        public bool continues;       // If true, auto-continue to the next attack in sequence.
+        public bool longWay;         // Use long rotation path 
+        public bool continues;    
+        public float damageBuff;     
+        public float penBuff;     
     }
 
     public class AnimationTask

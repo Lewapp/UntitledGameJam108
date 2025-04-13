@@ -1,56 +1,43 @@
 using UnityEngine;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class WeaponInfo : MonoBehaviour, IWeaponReadable
 {
     #region Properties and References
 
-    public IWeaponStatusable weaponStatus { get; set; }     // Interface reference for accessing weapon status functionality
-    public GameObject weapon { get; set; }                  // The weapon being tracked, with public getter and setter
-    public PlayerInfo playerInfo;
-    public GameObject[] weapons;
-    public GameObject currentWeapon;                        // The currently equipped weapon GameObject, assigned via the Inspector
+    public List<IWeaponStatusable> weaponStatus { get; set; }     // Interface reference for accessing weapon status functionality
+    public List<GameObject> weapons { get; set; }                  // The weapon being tracked
+    public List<GameObject> availableWeapons;
+    public List<GameObject> currentWeapons;                        // The currently equipped weapon GameObject, assigned via the Inspector
 
 
     #endregion
 
+    //TODO make all weapon variables accept multiple weapons
+
     private void Awake()
     {
-        foreach (GameObject weapon in weapons)
+        weaponStatus = new List<IWeaponStatusable>();
+        weapons = new List<GameObject>();
+        currentWeapons = new List<GameObject>();
+        foreach (GameObject weapon in availableWeapons)
         {
             weapon.SetActive(false);
-            IWeaponStatusable weaponStatus = weapon.GetComponent<IWeaponStatusable>();
-            if (weaponStatus == null)
+            IWeaponStatusable wStatus = weapon.GetComponent<IWeaponStatusable>();
+            if (wStatus == null)
                 continue;
-
-            if (playerInfo.selectedWeapon == weaponStatus.GetWeaponType())
+            if (GlobalData.playerInfo.selectedWeapon == wStatus.GetWeaponType())
             {
                 weapon.SetActive(true);
-                currentWeapon = weapon;
-            }
-
-        }
-
-        UpdateWeaponInfo();
-    }
-
-    private void Update()
-    {
-        UpdateWeaponInfo();
-    }
-
-    // Updates the internal weapon information based on the currentWeapon reference
-    private void UpdateWeaponInfo()
-    {
-        if (currentWeapon)
-        {
-            // Assigns the current weapon to the internal weapon reference
-            weapon = currentWeapon;
-
-            // Retrieves the IWeaponStatusable component only if not already set
-            if (weaponStatus == null)
-            {
-                weaponStatus = weapon.GetComponent<IWeaponStatusable>();
+                currentWeapons.Add(weapon);
+                weaponStatus.Add(wStatus);
             }
         }
+    }
+
+    public List<GameObject> GetWeapons()
+    {
+        return currentWeapons;
     }
 }

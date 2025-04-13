@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -30,17 +32,24 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
 
     private IWeaponReadable currrentWeapon;     // Interface for current weapon reference
     private IDamageable thisHealth;             // Interface for health and invincibility control
-    private IWeaponStatusable thisWeapon;       // Interface for weapon-specific stats and states
+    private List<IWeaponStatusable> thisWeapon;       // Interface for weapon-specific stats and states
 
     private void Start()
     {
+        thisWeapon = new List<IWeaponStatusable>();
+
         dashAmount = maxDashAmount;
 
         // Get components implementing damageable and weapon-readable interfaces
         thisHealth = GetComponent<IDamageable>();
         currrentWeapon = GetComponent<IWeaponReadable>();
         if (currrentWeapon != null)
-            thisWeapon = currrentWeapon.weapon.GetComponent<IWeaponStatusable>();
+        {
+            for (int i = 0; i < currrentWeapon.GetWeapons().Count; i++)
+            {
+                thisWeapon.Add(currrentWeapon.GetWeapons()[i].GetComponent<IWeaponStatusable>());
+            }
+        }
 
         // Set movement stats based on current weapon or default
         SetMovementStats();
@@ -98,23 +107,27 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
     /// </summary>
     private void ApplyMovement()
     {
-        if (currrentWeapon?.weaponStatus?.IsBlocking == true)
+        for (int i = 0; i < thisWeapon.Count; i++)
         {
-            rb.linearVelocity = moveDirection * shieldedMoveSpeed;
-        }
-        else
-        {
-            rb.linearVelocity = moveDirection * moveSpeed;
-            // Only move if the weapon is not mid-attack
-            if (!thisWeapon.IsInAnimation())
+            if (currrentWeapon?.weaponStatus[i]?.IsBlocking == true)
             {
-                rb.linearVelocity = moveDirection * moveSpeed;
+                rb.linearVelocity = moveDirection * shieldedMoveSpeed;
             }
             else
             {
-                rb.linearVelocity = moveDirection * attackMovement;
+                rb.linearVelocity = moveDirection * moveSpeed;
+                // Only move if the weapon is not mid-attack
+                if (!thisWeapon[i].IsInAnimation())
+                {
+                    rb.linearVelocity = moveDirection * moveSpeed;
+                }
+                else
+                {
+                    rb.linearVelocity = moveDirection * attackMovement;
+                }
             }
         }
+
     }
 
     /// <summary>
@@ -138,14 +151,14 @@ public class PlayerMovement : MonoBehaviour, IUiReadable
         }
 
         // Retrieve stats from weapon interface
-        moveSpeed = thisWeapon.GetWeaponStats().moveSpeed;
-        shieldedMoveSpeed = thisWeapon.GetWeaponStats().shieldedMovement;
-        dashSpeed = thisWeapon.GetWeaponStats().dashSpeed;
-        weakDashNerf = thisWeapon.GetWeaponStats().weakDashNerf;
-        dashDuration = thisWeapon.GetWeaponStats().dashDuration;
-        dashCooldown = thisWeapon.GetWeaponStats().dashCooldown;
-        maxDashAmount = thisWeapon.GetWeaponStats().maxDashAmount;
-        maxWeakDashAmount = thisWeapon.GetWeaponStats().maxWeakDashAmount;
+        moveSpeed = thisWeapon[0].GetWeaponStats().moveSpeed;
+        shieldedMoveSpeed = thisWeapon[0].GetWeaponStats().shieldedMovement;
+        dashSpeed = thisWeapon[0].GetWeaponStats().dashSpeed;
+        weakDashNerf = thisWeapon[0].GetWeaponStats().weakDashNerf;
+        dashDuration = thisWeapon[0].GetWeaponStats().dashDuration;
+        dashCooldown = thisWeapon[0].GetWeaponStats().dashCooldown;
+        maxDashAmount = thisWeapon[0].GetWeaponStats().maxDashAmount;
+        maxWeakDashAmount = thisWeapon[0].GetWeaponStats().maxWeakDashAmount;
     }
 
     /// <summary>

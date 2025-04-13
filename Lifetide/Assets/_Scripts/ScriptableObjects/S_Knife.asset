@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbdee2f8a8d82b4479ae18574f77e7a4, type: 3}
+  m_Name: S_Knife
+  m_EditorClassIdentifier: 
+  weaponName: Knife
+  maxDamage: 5
+  penPower: 6
+  blocking: 3
+  blockRange: 0.35
+  shieldRechargeRate: {x: 2.2, y: 1.4}
+  moveSpeed: 18
+  shieldedMovement: 9
+  dashSpeed: 45
+  weakDashNerf: 0.2
+  dashDuration: 0.1
+  dashCooldown: 2
+  maxDashAmount: 4
+  maxWeakDashAmount: 5

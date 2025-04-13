@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6e6a1c0f51144244bb56fff6e0f7971, type: 3}
   m_Name: Player Info
   m_EditorClassIdentifier: 
-  selectedWeapon: 0
-  selectedDifficulty: 2
-  timeSurvived: 0
+  selectedWeapon: 1
+  selectedDifficulty: 1
+  musicVolume: 0.5
+  sfxVolume: 0.5
+  timeSurvived: 21.22607
   kills: 0
   specialsKilled: 0

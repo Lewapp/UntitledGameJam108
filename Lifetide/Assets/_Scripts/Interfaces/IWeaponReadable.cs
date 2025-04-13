@@ -1,7 +1,9 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public interface IWeaponReadable
 {
-    public GameObject weapon { get; set;  }
-    public IWeaponStatusable weaponStatus { get; set; }
+    public List<IWeaponStatusable> weaponStatus { get; set; }
+
+    public List<GameObject> GetWeapons();
 }

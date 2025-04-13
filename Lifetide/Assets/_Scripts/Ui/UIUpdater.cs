@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using static InfoStore;
+using UnityEngine.SceneManagement;
 
 
 public class UIUpdater : MonoBehaviour
@@ -15,6 +16,9 @@ public class UIUpdater : MonoBehaviour
     public TextMeshProUGUI dashesTXT;
     // Reference to the player GameObject whose stats will be tracked
     public GameObject player;
+
+    public float deathScreenDuration;
+    private bool loadingSummaryScreen;
 
 
     // A list of components implementing IUiReadable, used to pull UI-relevant data
@@ -65,6 +69,9 @@ public class UIUpdater : MonoBehaviour
                     {
                         uiReadings[x].Activate();
                     }
+
+                    if (!loadingSummaryScreen)
+                        StartCoroutine(ContinueToEndScreen());
                 }
             }
 
@@ -85,4 +92,11 @@ public class UIUpdater : MonoBehaviour
 
         StartCoroutine(UiUpdate());
     }  
+
+    private IEnumerator ContinueToEndScreen()
+    {
+        loadingSummaryScreen = true;
+        yield return new WaitForSeconds(deathScreenDuration);
+        SceneManager.LoadScene(sceneBuildIndex: 2);
+    }
 }

@@ -4,16 +4,18 @@ using UnityEngine;
 public class AudioSourceVolume : MonoBehaviour
 {
     public bool isMusic;
-    public PlayerInfo playerInfo;
     public float maxVolume;
 
     private AudioSource volumeSource { get => GetComponent<AudioSource>(); }
 
     private void Update()
     {
+        if (!GlobalData.playerInfo)
+            return;
+
         if (isMusic)
-            volumeSource.volume = maxVolume * playerInfo.musicVolume;
+            volumeSource.volume = maxVolume * GlobalData.playerInfo.musicVolume;
         else
-            volumeSource.volume = maxVolume * playerInfo.sfxVolume;
+            volumeSource.volume = maxVolume * GlobalData.playerInfo.sfxVolume;
     }
 }

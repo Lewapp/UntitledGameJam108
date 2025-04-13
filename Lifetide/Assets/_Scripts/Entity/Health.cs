@@ -32,7 +32,7 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
         // Get weapon info and weapon stats if available
         weaponInfo = GetComponent<IWeaponReadable>();
         if (weaponInfo?.weaponStatus != null)
-            weaponStats = weaponInfo.weaponStatus.GetWeaponStats();
+            weaponStats = weaponInfo.weaponStatus[0].GetWeaponStats();
 
         // If weapon has shielding capability, initialise shield amount
         if (weaponStats) shieldAmount = weaponStats.blocking;
@@ -54,7 +54,7 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
         // Enable blocking if shield is available
         if (shieldAmount > 0 && weaponInfo?.weaponStatus != null)
         {
-            weaponInfo.weaponStatus.CanBlock = true;
+            weaponInfo.weaponStatus[0].CanBlock = true;
         }
     }
 
@@ -104,7 +104,7 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
     /// <returns>True if damage was blocked, false if not</returns>
     private bool ShieldCheck(Transform source)
     {
-        if (weaponInfo?.weaponStatus?.IsBlocking == true)
+        if (weaponInfo?.weaponStatus[0]?.IsBlocking == true)
         {
             shieldTime = 0f; // Reset recharge timer
             shieldAmount--;
@@ -119,7 +119,7 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
 
             // If out of shield, disable blocking
             if (shieldAmount <= 0)
-                weaponInfo.weaponStatus.CanBlock = false;
+                weaponInfo.weaponStatus[0].CanBlock = false;
 
             return true;
         }
@@ -173,6 +173,14 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
     /// </summary>
     private void Die()
     {
+        if (characterType != CharacterStats.characterTypes.Player && GlobalData.playerInfo)
+        {
+            GlobalData.playerInfo.kills++;
+            if (characterType != CharacterStats.characterTypes.Basic)
+            {
+                GlobalData.playerInfo.specialsKilled++;
+            }
+        }
         Destroy(gameObject);
     }
 

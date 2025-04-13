@@ -49,6 +49,7 @@ public class SpawnDirector : MonoBehaviour
             return;
 
         timeSurvived += Time.deltaTime;
+        GlobalData.playerInfo.timeSurvived = timeSurvived;
 
         if (spawners < spawnDirectables.Count)
         {
@@ -68,7 +69,7 @@ public class SpawnDirector : MonoBehaviour
     private void UniqueSpawn()
     {
         Vector2 minMax;
-        float multiplier = Time.deltaTime * difficultyMultiplier;
+        float multiplier = timeSurvived * difficultyMultiplier;
 
         nextSpecialTime -= Time.deltaTime;
         if (nextSpecialTime <= 0)

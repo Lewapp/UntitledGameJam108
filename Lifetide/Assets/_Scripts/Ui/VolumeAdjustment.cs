@@ -3,7 +3,6 @@ using UnityEngine.UI;
 
 public class VolumeAdjustment : MonoBehaviour
 {
-    public PlayerInfo playerInfo;
     public Slider musicSlider;
     public Slider sfxSlider;
 
@@ -15,7 +14,11 @@ public class VolumeAdjustment : MonoBehaviour
 
     private void Update()
     {
-        playerInfo.musicVolume = musicSlider.value;
-        playerInfo.sfxVolume = sfxSlider.value;
+        if (GlobalData.playerInfo)
+        {
+            GlobalData.playerInfo.musicVolume = musicSlider.value;
+            GlobalData.playerInfo.sfxVolume = sfxSlider.value;
+        }
+
     }
 }

@@ -19,5 +19,6 @@ public class PlayerInfo : ScriptableObject
     {
         Sword,
         Axe,
+        Knife,
     }
 }

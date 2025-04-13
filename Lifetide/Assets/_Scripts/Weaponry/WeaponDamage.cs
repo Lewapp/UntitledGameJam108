@@ -47,7 +47,11 @@ public class WeaponDamage : MonoBehaviour, IDirectable
 
             if (weaponStatus.AttackStart)
             {
-                currentPenPower = weaponStatus.GetWeaponStats().penPower * (1 + penMP);
+                float penPower = weaponStatus.GetWeaponStats().penPower;
+                penPower += penPower * (penMP + weaponStatus.penScale);
+
+                currentPenPower = penPower;
+                //  TODO: AttakNO seems to start at animation 1 not 0. Also, for some reason, I higher pen in the animation causes the damage to be lower. I thought it was doing animation 1 but wasnt
             }
         }
     }
@@ -79,12 +83,15 @@ public class WeaponDamage : MonoBehaviour, IDirectable
             // If the collided object is damageable, apply damage and add it to the hit list.
             if (damageable != null)
             {
-                float powerPercent = currentPenPower / (weaponStatus.GetWeaponStats().penPower * (1 + penMP));
+                float maxPenPower = weaponStatus.GetWeaponStats().penPower;
+                maxPenPower += maxPenPower * (penMP + weaponStatus.penScale);
 
-                float damage = weaponStatus.GetWeaponStats().maxDamage * powerPercent;
-                damage += damage * damageMp;
+                float powerPercent = currentPenPower / maxPenPower;
+
+                float damage = weaponStatus.GetWeaponStats().maxDamage * Mathf.Clamp01(powerPercent);
+                damage += (damage * damageMp) + (damage * weaponStatus.damageScale);
                 damage = Mathf.Clamp(damage, 0, Mathf.Infinity);
-
+                Debug.LogWarning(damage + " : " + currentPenPower + " : " + damageable.mass);
                 damageable.TakeDamage(damage, gameObject);
                 hitEnemies.Add(collision.gameObject);  // Add the enemy to the list to prevent multiple hits.
 
