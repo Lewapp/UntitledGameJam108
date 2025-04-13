@@ -9,6 +9,11 @@ public class MenuButtons : MonoBehaviour
 
     private DifficultyInfo.Difficulties currentDifficulty;
 
+    private void Awake()
+    {
+        GlobalData.playerInfo = playerInfo;
+    }
+
     private void Start()
     {
         currentDifficulty = DifficultyInfo.Difficulties.Medium;

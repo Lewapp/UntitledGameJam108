@@ -119,7 +119,13 @@ public class Health : MonoBehaviour, IDamageable, IUiReadable, IDirectable
 
             // If out of shield, disable blocking
             if (shieldAmount <= 0)
-                weaponInfo.weaponStatus[0].CanBlock = false;
+            {
+                for (int i = 0; i < weaponInfo.weaponStatus.Count; i++)
+                {
+                   weaponInfo.weaponStatus[i].CanBlock = false;
+                }
+            }
+
 
             return true;
         }

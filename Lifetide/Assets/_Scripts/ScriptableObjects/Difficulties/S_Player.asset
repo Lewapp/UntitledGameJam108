@@ -15,11 +15,11 @@ MonoBehaviour:
   characterType: 1
   stats:
   - difficulty: 0
-    maxHealth: 150
+    maxHealth: 80
     mass: 1
     moveSpeed: 3
     attackMoveSpeed: 1
-    damageMp: 0.2
+    damageMp: 0.1
     penetrationMp: 0
     delayMp: 0.2
     attackSpeedMp: 0.2
@@ -33,11 +33,11 @@ MonoBehaviour:
     delayMp: 0
     attackSpeedMp: 0
   - difficulty: 2
-    maxHealth: 80
+    maxHealth: 150
     mass: 1
     moveSpeed: 2.5
     attackMoveSpeed: 1
-    damageMp: -0.1
-    penetrationMp: -0.2
-    delayMp: -0.1
+    damageMp: 0.1
+    penetrationMp: 0
+    delayMp: 0
     attackSpeedMp: 0

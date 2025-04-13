@@ -91,7 +91,6 @@ public class WeaponDamage : MonoBehaviour, IDirectable
                 float damage = weaponStatus.GetWeaponStats().maxDamage * Mathf.Clamp01(powerPercent);
                 damage += (damage * damageMp) + (damage * weaponStatus.damageScale);
                 damage = Mathf.Clamp(damage, 0, Mathf.Infinity);
-                Debug.LogWarning(damage + " : " + currentPenPower + " : " + damageable.mass);
                 damageable.TakeDamage(damage, gameObject);
                 hitEnemies.Add(collision.gameObject);  // Add the enemy to the list to prevent multiple hits.
 
