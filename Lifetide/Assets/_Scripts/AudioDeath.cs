@@ -4,15 +4,21 @@ using UnityEngine;
 public class AudioDeath : MonoBehaviour
 {
     private AudioSource audioSource;
+    private bool audioStarted;
 
-    void Start()
+    private void Start()
     {
         audioSource = GetComponent<AudioSource>();
     }
 
-    void Update()
+    private void Update()
     {
-        if (!audioSource.isPlaying && audioSource.time > 0f)
+        if (audioSource.time > 0f)
+        {
+            audioStarted = true;
+        }
+
+        if (!audioSource.isPlaying && audioStarted)
         {
             Destroy(gameObject);
         }

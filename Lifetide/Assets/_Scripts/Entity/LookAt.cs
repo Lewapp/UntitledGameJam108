@@ -40,6 +40,10 @@ public class LookAt : MonoBehaviour
                     if (enemy == gameObject)
                         continue;
 
+                    // Temporary: Remove this in favour for being able to get the type of an enemy through an interface
+                    if (enemy.GetComponentInChildren<HealingRing>())
+                        continue;
+
                     targetPosition = enemy.transform.position;
                     targetObject = enemy;
                     break;

@@ -144,7 +144,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isMusic: 0
-  maxVolume: 1.2
+  maxVolume: 1.6
 --- !u!114 &1582544548881027875
 MonoBehaviour:
   m_ObjectHideFlags: 0

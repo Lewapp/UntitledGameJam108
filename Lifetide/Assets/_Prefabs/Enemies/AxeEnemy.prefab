@@ -328,7 +328,8 @@ MonoBehaviour:
   characterType: 2
   hitSpawn: {fileID: 4750333317665291570, guid: 3728ec032f178644589f7bead06a6324, type: 3}
   deathSound: {fileID: 4246440581595593653, guid: f7eac7b1878402945871f9d495d3f9d1, type: 3}
-  hitSound: {fileID: 4459641380597028966, guid: 9494144c69988f546b1c83f0969d8b41, type: 3}
+  hitSound: {fileID: 8568524209357518832, guid: f85bad9eb7aca3744a34da71edfd56d9, type: 3}
+  armourSound: {fileID: 0}
   currentHealth: 0
 --- !u!114 &5088035741098551034
 MonoBehaviour:
